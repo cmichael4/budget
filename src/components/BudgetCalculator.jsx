@@ -381,17 +381,24 @@ const BudgetCalculator = () => {
     const { name, value } = e.target;
     setBudgetData(prev => ({
       ...prev,
-      [name]: Number(value)
+      [name]: value === '' || value === null ? 0 : parseFloat(value) || 0
     }));
   };
 
   const handleExpenseChange = (id, field, value) => {
+    if (field === 'amount') {
+      // Handle the raw input value
+      value = value === '' || value === null ? 0 : parseFloat(value) || 0;
+    }
     setExpenses(prev => prev.map(expense => 
       expense.id === id ? { ...expense, [field]: value } : expense
     ));
   };
 
   const handleSubscriptionChange = (id, field, value) => {
+    if (field === 'amount') {
+      value = value === '' || value === null ? 0 : parseFloat(value) || 0;
+    }
     setSubscriptions(prev => prev.map(sub => 
       sub.id === id ? { ...sub, [field]: value } : sub
     ));
@@ -432,7 +439,7 @@ const BudgetCalculator = () => {
           <InputWrapper>
             <StyledInputField
               type="number"
-              value={income.amount}
+              value={income.amount || ''}
               onChange={(e) => handleVariableIncomeChange(income.id, 'amount', Number(e.target.value))}
               placeholder="0.00"
               step="0.01"
@@ -501,6 +508,9 @@ const BudgetCalculator = () => {
   };
 
   const handleAdditionalIncomeChange = (id, field, value) => {
+    if (field === 'amount') {
+      value = value === '' || value === null ? 0 : parseFloat(value) || 0;
+    }
     setAdditionalIncomes(additionalIncomes.map(income => 
       income.id === id ? { ...income, [field]: value } : income
     ));
@@ -600,7 +610,7 @@ const BudgetCalculator = () => {
                     <StyledInputField
                       type="number"
                       name="biweeklyPaycheck"
-                      value={budgetData.biweeklyPaycheck}
+                      value={budgetData.biweeklyPaycheck || ''}
                       onChange={handleInputChange}
                       placeholder="0.00"
                       step="0.01"
@@ -620,7 +630,7 @@ const BudgetCalculator = () => {
                             <span className="currency-symbol">$</span>
                             <StyledInputField
                               type="number"
-                              value={income.amount}
+                              value={income.amount || ''}
                               onChange={(e) => handleAdditionalIncomeChange(income.id, 'amount', Number(e.target.value))}
                               placeholder="0.00"
                             />
@@ -673,9 +683,11 @@ const BudgetCalculator = () => {
                         <span className="currency-symbol">$</span>
                         <StyledInputField
                           type="number"
-                          value={expense.amount}
-                          onChange={(e) => handleExpenseChange(expense.id, 'amount', Number(e.target.value))}
+                          value={expense.amount || ''}
+                          onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
                           placeholder="0.00"
+                          step="0.01"
+                          min="0"
                         />
                       </AmountInputGroup>
                       <StyledDeleteButton 
@@ -705,7 +717,7 @@ const BudgetCalculator = () => {
                     <StyledInputField
                       type="number"
                       name="savingsGoalYear"
-                      value={budgetData.savingsGoalYear}
+                      value={budgetData.savingsGoalYear || ''}
                       onChange={handleInputChange}
                       placeholder="0.00"
                       step="0.01"
