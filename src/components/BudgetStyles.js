@@ -1,5 +1,41 @@
 import styled from 'styled-components';
 
+export const InputWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+
+  &::before {
+    content: '$';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    z-index: 1;
+  }
+`;
+
+export const InputRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    
+    ${InputWrapper} {
+      width: 100%;
+    }
+  }
+`;
+
 export const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -18,22 +54,6 @@ export const BudgetTable = styled.div`
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-`;
-
-export const InputRow = styled.div`
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
-  width: 100%;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-    
-    ${InputWrapper} {
-      width: 100%;
-    }
-  }
 `;
 
 export const CalculatedRow = styled.div`
@@ -85,26 +105,6 @@ export const InputField = styled.input`
   &[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-  }
-`;
-
-export const InputWrapper = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-
-  &::before {
-    content: '$';
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #666;
-    z-index: 1;
   }
 `;
 
