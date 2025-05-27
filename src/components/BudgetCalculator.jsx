@@ -12,7 +12,6 @@ import {
   AddButton,
   InfoText,
   Tooltip,
-  SectionHeader,
   Summary,
   SummaryRow,
   SummaryLabel,
@@ -62,7 +61,7 @@ const BudgetCalculator = () => {
 
   useEffect(() => {
     calculateBudget();
-  }, [budgetData, expenses, variableIncomes, incomeType]);
+  }, [budgetData, expenses, variableIncomes, incomeType, subscriptions]);
 
   const calculateBudget = () => {
     const monthlyIncome = incomeType === 'fixed' 
@@ -135,7 +134,7 @@ const BudgetCalculator = () => {
   const VariableIncomeSection = () => (
     <div>
       <InfoText>
-        Enter your recent income amounts to calculate your average monthly income.
+        Enter your recent after-tax income amounts to calculate your average monthly income.
         We recommend entering at least 3 months of data for accuracy.
       </InfoText>
       {variableIncomes.map((income, index) => (
@@ -210,7 +209,7 @@ const BudgetCalculator = () => {
     <Container>
       <PageTitle>💰 Smart Budget Planner</PageTitle>
       <InfoText>
-        Quick start: Enter your paycheck, set a savings goal, and add your monthly expenses below.
+        Quick start: Enter your after-tax paycheck, set a savings goal, and add your monthly expenses below.
       </InfoText>
 
       <Summary>
@@ -272,7 +271,7 @@ const BudgetCalculator = () => {
             <>
               <InputRow>
                 <Label>
-                  Biweekly Paycheck<RequiredField>*</RequiredField>
+                  Biweekly Paycheck (After Tax)<RequiredField>*</RequiredField>
                 </Label>
                 <InputWrapper>
                   <InputField
@@ -287,7 +286,7 @@ const BudgetCalculator = () => {
                   />
                 </InputWrapper>
               </InputRow>
-              <HelpText>This is the amount you receive every two weeks</HelpText>
+              <HelpText>Enter the amount you receive every two weeks after taxes and deductions</HelpText>
             </>
           ) : (
             <VariableIncomeSection />
