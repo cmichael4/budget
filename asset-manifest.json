@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/budget/static/js/main.eea20652.js",
+    "main.js": "/budget/static/js/main.8bffb140.js",
     "index.html": "/budget/index.html",
-    "main.eea20652.js.map": "/budget/static/js/main.eea20652.js.map"
+    "main.8bffb140.js.map": "/budget/static/js/main.8bffb140.js.map"
   },
   "entrypoints": [
-    "static/js/main.eea20652.js"
+    "static/js/main.8bffb140.js"
   ]
 }
