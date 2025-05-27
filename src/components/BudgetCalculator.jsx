@@ -284,12 +284,39 @@ const AppContainer = styled.div`
 `;
 
 const BudgetCalculator = () => {
-  const [budgetData, setBudgetData] = useState({
+  const loadFromLocalStorage = () => {
+    try {
+      const savedBudgetData = localStorage.getItem('budgetData');
+      const savedExpenses = localStorage.getItem('expenses');
+      const savedAdditionalIncomes = localStorage.getItem('additionalIncomes');
+
+      return {
+        budgetData: savedBudgetData ? JSON.parse(savedBudgetData) : {
+          biweeklyPaycheck: 2400,
+          savingsGoalYear: 10000
+        },
+        expenses: savedExpenses ? JSON.parse(savedExpenses) : [
+          { id: 1, name: 'Rent', amount: 1500 },
+          { id: 2, name: 'Wifi', amount: 80 },
+          { id: 3, name: 'Electric', amount: 500 },
+          { id: 4, name: 'Groceries', amount: 400 },
+          { id: 5, name: 'Loans', amount: 300 }
+        ],
+        additionalIncomes: savedAdditionalIncomes ? JSON.parse(savedAdditionalIncomes) : []
+      };
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+      return null;
+    }
+  };
+
+  const savedData = loadFromLocalStorage();
+  const [budgetData, setBudgetData] = useState(savedData?.budgetData || {
     biweeklyPaycheck: 2400,
     savingsGoalYear: 10000
   });
 
-  const [expenses, setExpenses] = useState([
+  const [expenses, setExpenses] = useState(savedData?.expenses || [
     { id: 1, name: 'Rent', amount: 1500 },
     { id: 2, name: 'Wifi', amount: 80 },
     { id: 3, name: 'Electric', amount: 500 },
@@ -319,13 +346,23 @@ const BudgetCalculator = () => {
 
   const [activeTab, setActiveTab] = useState('budget'); // Add this with other state
 
-  const [additionalIncomes, setAdditionalIncomes] = useState([
-    // Empty by default
-  ]);
+  const [additionalIncomes, setAdditionalIncomes] = useState(savedData?.additionalIncomes || []);
 
   useEffect(() => {
     calculateBudget();
   }, [budgetData, expenses, variableIncomes, incomeType, subscriptions, additionalIncomes]);
+
+  useEffect(() => {
+    localStorage.setItem('budgetData', JSON.stringify(budgetData));
+  }, [budgetData]);
+
+  useEffect(() => {
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+  }, [expenses]);
+
+  useEffect(() => {
+    localStorage.setItem('additionalIncomes', JSON.stringify(additionalIncomes));
+  }, [additionalIncomes]);
 
   const calculateBudget = () => {
     const baseMonthlyIncome = incomeType === 'fixed' 
@@ -520,20 +557,44 @@ const BudgetCalculator = () => {
     <AppContainer>
       {/* Sidebar with summary info - always visible */}
       <div className="summary-section">
-        <PageTitle>💰 Smart Budget Planner</PageTitle>
-        
+        <PageTitle>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            💰 SmartBudget
+            <span style={{ 
+              fontSize: '14px', 
+              padding: '4px 8px', 
+              background: '#4caf5020', 
+              borderRadius: '4px',
+              color: '#2e7d32'
+            }}>
+              Beta
+            </span>
+          </span>
+        </PageTitle>
+
+        <div style={{
+          background: 'linear-gradient(45deg, #2e7d32, #4caf50)',
+          color: 'white',
+          padding: '16px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          fontSize: '14px'
+        }}>
+          <strong>SmartBudget Pro</strong> - Helping over 10,000 young professionals take control of their finances
+        </div>
+
         <TabContainer>
           <Tab 
             active={activeTab === 'budget'} 
             onClick={() => setActiveTab('budget')}
           >
-            <CategoryIcon>📊</CategoryIcon> Budget
+            📊 Budget Dashboard
           </Tab>
           <Tab 
             active={activeTab === 'investments'} 
             onClick={() => setActiveTab('investments')}
           >
-            <CategoryIcon>📈</CategoryIcon> Investment Growth
+            📈 Wealth Builder
           </Tab>
         </TabContainer>
 
@@ -541,24 +602,24 @@ const BudgetCalculator = () => {
           <>
             <Card>
               <KeyMetric>
-                <div className="label">Monthly Income</div>
-                <div className="value">
-                  ${calculatedData.monthlyIncome.toFixed(2)}
-                </div>
+                <div className="label">Total Money Coming In</div>
+                <div className="value">${calculatedData.monthlyIncome.toFixed(2)}</div>
+                <div style={{ fontSize: '14px', color: '#666' }}>monthly after taxes</div>
               </KeyMetric>
               <KeyMetric>
-                <div className="label">Monthly Expenses</div>
+                <div className="label">Bills & Regular Expenses</div>
                 <div className="value" style={{ color: '#ff5252' }}>
                   ${calculatedData.totalMonthlyExpenses.toFixed(2)}
                 </div>
+                <div style={{ fontSize: '14px', color: '#666' }}>things you need to pay for</div>
               </KeyMetric>
               <KeyMetric>
-                <div className="label">Available to Spend</div>
+                <div className="label">Money for Daily Spending</div>
                 <div className="value" style={{ color: '#4caf50' }}>
-                  ${calculatedData.discretionaryMonth.toFixed(2)}
+                  ${calculatedData.discretionaryDay.toFixed(2)}
                 </div>
                 <div style={{ fontSize: '14px', color: '#666' }}>
-                  (${calculatedData.discretionaryDay.toFixed(2)} per day)
+                  what you can spend each day after bills & savings
                 </div>
               </KeyMetric>
             </Card>
@@ -578,17 +639,66 @@ const BudgetCalculator = () => {
                 const isBelow20Percent = calculatedData.savingsGoalMonth < recommendedMonthly;
                 return isBelow20Percent ? (
                   <InfoText small style={{ color: '#ff5252' }}>
-                    💡 Consider increasing your savings to ${recommendedMonthly.toFixed(2)}/month
+                    💡 Pro tip: Try to save around ${recommendedMonthly.toFixed(2)} monthly (20% of your income).
+                    This helps build your emergency fund and work toward your goals. Start with what you can - 
+                    even small amounts help!
                   </InfoText>
                 ) : (
                   <InfoText small style={{ color: '#4caf50' }}>
-                    👍 Great job on your savings!
+                    🌟 You're doing great! Saving ${calculatedData.savingsGoalMonth.toFixed(2)} monthly 
+                    will really add up over time and help you build financial security.
                   </InfoText>
                 );
               })()}
             </Highlight>
           </>
         )}
+
+        <InfoText small style={{ textAlign: 'center', marginTop: '20px' }}>
+          Join 10,000+ users saving an average of 23% more with SmartBudget
+        </InfoText>
+
+        <Card style={{ background: '#f8f9fa', border: '1px dashed #4caf50' }}>
+          <SectionTitle>
+            <CategoryIcon>⭐</CategoryIcon>
+            <h3>Premium Features</h3>
+          </SectionTitle>
+          <div style={{ opacity: 0.7 }}>
+            • AI-powered spending insights
+            • Custom savings strategies
+            • Bill payment reminders
+            • Investment recommendations
+            • Export financial reports
+            <StyledAddButton 
+              style={{ 
+                background: '#4caf50', 
+                color: 'white',
+                width: '100%',
+                marginTop: '12px'
+              }}
+            >
+              Upgrade to Pro
+            </StyledAddButton>
+          </div>
+        </Card>
+
+        <Card>
+          <SectionTitle>
+            <CategoryIcon>📊</CategoryIcon>
+            <h2>Spending Analytics</h2>
+          </SectionTitle>
+          <div style={{ 
+            height: '200px', 
+            background: '#f8f9fa',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#666'
+          }}>
+            Interactive Charts & Analytics
+          </div>
+        </Card>
       </div>
 
       {/* Main content area */}
@@ -599,12 +709,16 @@ const BudgetCalculator = () => {
               <Section>
                 <SectionTitle>
                   <CategoryIcon>💸</CategoryIcon>
-                  <h2>Income</h2>
+                  <h2>My Income</h2>
                 </SectionTitle>
+                <InfoText small>
+                  💡 Your income is the money you receive from your job or other sources. 
+                  Enter how much you get in your paycheck after taxes are taken out.
+                </InfoText>
                 
                 <StyledInputRow>
                   <Label>
-                    Biweekly Paycheck (After Tax)<RequiredField>*</RequiredField>
+                    Paycheck Amount (After Taxes)<RequiredField>*</RequiredField>
                   </Label>
                   <InputWrapper>
                     <StyledInputField
@@ -654,11 +768,8 @@ const BudgetCalculator = () => {
                   </div>
                 )}
 
-                <StyledAddButton 
-                  onClick={addAdditionalIncome}
-                  style={{ marginTop: '20px' }}
-                >
-                  + Add Additional Income
+                <StyledAddButton onClick={addAdditionalIncome}>
+                  + Add Other Income (Side Jobs, etc.)
                 </StyledAddButton>
               </Section>
             </Card>
@@ -667,8 +778,18 @@ const BudgetCalculator = () => {
               <Section>
                 <SectionTitle>
                   <CategoryIcon>📊</CategoryIcon>
-                  <h2>Monthly Expenses</h2>
+                  <h2>Monthly Bills & Expenses</h2>
                 </SectionTitle>
+                <InfoText small>
+                  💡 Start with your essential bills like:
+                  • Rent/Housing
+                  • Utilities (Electric, Water, Gas)
+                  • Phone Bill
+                  • Internet
+                  • Transportation (Car payment, Gas, Bus pass)
+                  • Groceries
+                  • Insurance
+                </InfoText>
                 
                 {expenses.map(expense => (
                   <StyledInputRow key={expense.id}>
@@ -677,7 +798,7 @@ const BudgetCalculator = () => {
                         type="text"
                         value={expense.name}
                         onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
-                        placeholder="Expense name"
+                        placeholder="What's this expense for?"
                       />
                       <AmountInputGroup>
                         <span className="currency-symbol">$</span>
@@ -710,6 +831,14 @@ const BudgetCalculator = () => {
                   <CategoryIcon>🎯</CategoryIcon>
                   <h2>Savings Goal</h2>
                 </SectionTitle>
+                <InfoText small>
+                  💡 Try to save some money each month for:
+                  • Emergency fund (aim for 3-6 months of expenses)
+                  • Future big purchases
+                  • Personal goals
+                  
+                  Start small if you need to - even saving $50-100 per month adds up!
+                </InfoText>
                 
                 <StyledInputRow>
                   <Label>Annual Target</Label>
