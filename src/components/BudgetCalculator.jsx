@@ -31,6 +31,10 @@ const TabContainer = styled.div`
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const Tab = styled.button`
@@ -45,6 +49,159 @@ const Tab = styled.button`
 
   &:hover {
     background: ${props => props.active ? '#2e7d32' : '#e0e0e0'};
+  }
+`;
+
+const Card = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+    border-radius: 8px;
+  }
+`;
+
+const Highlight = styled.div`
+  background: #f0f7f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #4caf5040;
+`;
+
+const KeyMetric = styled.div`
+  text-align: center;
+  padding: 20px;
+  flex: 1;
+  min-width: 200px;
+  
+  @media (max-width: 768px) {
+    padding: 15px 10px;
+    min-width: 100%;
+    border-bottom: 1px solid #eee;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  
+  .value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2e7d32;
+    margin: 8px 0;
+    
+    @media (max-width: 768px) {
+      font-size: 20px;
+    }
+  }
+  
+  .label {
+    color: #666;
+    font-size: 16px;
+  }
+`;
+
+const InputRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px;
+  }
+`;
+
+const StyledSelect = styled.select`
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  margin-left: 10px;
+  
+  @media (max-width: 768px) {
+    margin-left: 0;
+    margin-top: 8px;
+    width: 100%;
+  }
+`;
+
+const AddButton = styled.button`
+  background: none;
+  border: 2px solid #4caf50;
+  color: #4caf50;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 20px 0;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  &:hover {
+    background: #4caf5010;
+  }
+`;
+
+const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  color: #ff5252;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  
+  @media (max-width: 768px) {
+    align-self: flex-end;
+    margin-top: -40px;
+  }
+  
+  &:hover {
+    background: #ff525210;
+  }
+`;
+
+const InputField = styled.input`
+  padding: 12px;
+  padding-left: ${props => props.type === 'number' ? '24px' : '12px'};
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 100%;
+  font-size: 16px;
+  background: white;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 8px;
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: #4caf50;
+    box-shadow: 0 0 0 2px #4caf5020;
   }
 `;
 
@@ -252,41 +409,48 @@ const BudgetCalculator = () => {
       {activeTab === 'budget' ? (
         <>
           <InfoText>
-            Quick start: Enter your after-tax paycheck, set a savings goal, and add your monthly expenses below.
+            Quick start: Enter your income, set a savings goal, and track your expenses.
           </InfoText>
 
-          <Summary>
-            <SummaryRow>
-              <SummaryLabel>
-                <CategoryIcon>💵</CategoryIcon>
-                Daily Spending Budget:
-              </SummaryLabel>
-              <SummaryValue>${calculatedData.discretionaryDay.toFixed(2)}</SummaryValue>
-            </SummaryRow>
-            <SummaryRow>
-              <SummaryLabel>
-                <CategoryIcon>📅</CategoryIcon>
-                Weekly Spending Budget:
-              </SummaryLabel>
-              <SummaryValue>${calculatedData.discretionaryWeek.toFixed(2)}</SummaryValue>
-            </SummaryRow>
-            <InfoText small style={{ color: 'white', margin: '5px 0 15px 0' }}>
-              Know exactly how much you can spend after bills & savings
-            </InfoText>
-
-            {/* Money Breakdown Section */}
+          <Card>
             <div style={{ 
-              borderTop: '1px solid rgba(255,255,255,0.2)',
-              paddingTop: '15px' 
+              display: 'flex', 
+              gap: '20px', 
+              flexWrap: 'wrap',
+              margin: '20px 0',
+              background: '#f8f9fa',
+              borderRadius: '8px',
+              padding: '10px'
             }}>
-              <SummaryLabel style={{ fontSize: '18px', marginBottom: '10px', display: 'block' }}>
-                <CategoryIcon>📊</CategoryIcon>
-                Money Breakdown
-              </SummaryLabel>
+              <KeyMetric>
+                <div className="label">Daily Budget</div>
+                <div className="value">
+                  ${calculatedData.discretionaryDay.toFixed(2)}
+                </div>
+                <div style={{ color: '#4caf50', fontSize: '14px' }}>
+                  Available to spend today
+                </div>
+              </KeyMetric>
+              <KeyMetric>
+                <div className="label">Weekly Budget</div>
+                <div className="value">
+                  ${calculatedData.discretionaryWeek.toFixed(2)}
+                </div>
+              </KeyMetric>
+              <KeyMetric>
+                <div className="label">Monthly Savings</div>
+                <div className="value">
+                  ${calculatedData.savingsGoalMonth.toFixed(2)}
+                </div>
+              </KeyMetric>
+            </div>
+
+            <Highlight>
+              <h3>💰 Money Breakdown</h3>
               <div style={{ 
                 display: 'grid', 
-                gap: '8px',
-                color: 'white'
+                gap: '12px',
+                margin: '15px 0'
               }}>
                 <div style={{ 
                   display: 'flex', 
@@ -313,219 +477,210 @@ const BudgetCalculator = () => {
                   <strong>{((calculatedData.discretionaryMonth / calculatedData.monthlyIncome) * 100).toFixed(1)}%</strong>
                 </div>
               </div>
-            </div>
-          </Summary>
+            </Highlight>
 
-          <Grid>
-            <Section>
-              <SectionTitle>
-                <CategoryIcon>💸</CategoryIcon>
-                <h2>Income</h2>
-              </SectionTitle>
-              <Tooltip>
-                Select your income type and enter your earnings
-              </Tooltip>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <Label>Income Type:</Label>
-                <select 
-                  value={incomeType}
-                  onChange={(e) => setIncomeType(e.target.value)}
-                  style={{ 
-                    padding: '8px', 
-                    borderRadius: '4px',
-                    border: '1px solid #ddd',
-                    marginLeft: '10px'
-                  }}
-                >
-                  <option value="fixed">Fixed (Regular Paycheck)</option>
-                  <option value="variable">Variable (Irregular Income)</option>
-                </select>
-              </div>
+            <Card>
+              <Section>
+                <SectionTitle>
+                  <CategoryIcon>💸</CategoryIcon>
+                  <h2>Income</h2>
+                </SectionTitle>
+                <Tooltip>
+                  Select your income type and enter your earnings
+                </Tooltip>
+                
+                <div style={{ marginBottom: '20px' }}>
+                  <Label>Income Type:</Label>
+                  <StyledSelect 
+                    value={incomeType}
+                    onChange={(e) => setIncomeType(e.target.value)}
+                  >
+                    <option value="fixed">Fixed (Regular Paycheck)</option>
+                    <option value="variable">Variable (Irregular Income)</option>
+                  </StyledSelect>
+                </div>
 
-              {incomeType === 'fixed' ? (
-                <>
-                  <InputRow>
-                    <Label>
-                      Biweekly Paycheck (After Tax)<RequiredField>*</RequiredField>
-                    </Label>
-                    <InputWrapper>
+                {incomeType === 'fixed' ? (
+                  <>
+                    <InputRow>
+                      <Label>
+                        Biweekly Paycheck (After Tax)<RequiredField>*</RequiredField>
+                      </Label>
+                      <InputWrapper>
+                        <InputField
+                          type="number"
+                          name="biweeklyPaycheck"
+                          value={budgetData.biweeklyPaycheck}
+                          onChange={handleInputChange}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          required
+                        />
+                      </InputWrapper>
+                    </InputRow>
+                    <HelpText>Enter the amount you receive every two weeks after taxes and deductions</HelpText>
+                  </>
+                ) : (
+                  <VariableIncomeSection />
+                )}
+              </Section>
+            </Card>
+
+            <Card>
+              <Section>
+                <SectionTitle>
+                  <CategoryIcon>🎯</CategoryIcon>
+                  <h2>Savings Goal</h2>
+                </SectionTitle>
+                <Tooltip>
+                  Setting aside money for savings is important for your financial health.
+                </Tooltip>
+                <InputRow>
+                  <Label>
+                    Annual Savings Goal<RequiredField>*</RequiredField>
+                  </Label>
+                  <InputWrapper>
+                    <InputField
+                      type="number"
+                      name="savingsGoalYear"
+                      value={budgetData.savingsGoalYear}
+                      onChange={handleInputChange}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                      required
+                    />
+                  </InputWrapper>
+                </InputRow>
+                <CalculatedRow>
+                  <Label>Monthly Savings Target:</Label>
+                  <Value>${calculatedData.savingsGoalMonth.toFixed(2)}</Value>
+                </CalculatedRow>
+                <InfoText small>
+                  {(() => {
+                    const recommendedMonthly = calculatedData.monthlyIncome * 0.2;
+                    const currentPercentage = (calculatedData.savingsGoalMonth / calculatedData.monthlyIncome) * 100;
+                    const isBelow20Percent = calculatedData.savingsGoalMonth < recommendedMonthly;
+
+                    return (
+                      <>
+                        💡 Recommended savings (20% of income): ${recommendedMonthly.toFixed(2)}/month
+                        <br />
+                        <span style={{ 
+                          color: isBelow20Percent ? '#ff5252' : '#4caf50',
+                          fontWeight: '500',
+                          marginTop: '4px',
+                          display: 'inline-block'
+                        }}>
+                          You're currently saving {currentPercentage.toFixed(1)}% of your income
+                          {isBelow20Percent ? ' (Consider increasing your savings)' : ' 👍'}
+                        </span>
+                      </>
+                    );
+                  })()}
+                </InfoText>
+              </Section>
+            </Card>
+
+            <Card>
+              <Section>
+                <SectionTitle>
+                  <CategoryIcon>📊</CategoryIcon>
+                  <h2>Monthly Expenses</h2>
+                </SectionTitle>
+                {expenses.map(expense => (
+                  <InputRow key={expense.id}>
+                    <div style={{ width: '100%' }}>
                       <InputField
-                        type="number"
-                        name="biweeklyPaycheck"
-                        value={budgetData.biweeklyPaycheck}
-                        onChange={handleInputChange}
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                        required
+                        type="text"
+                        value={expense.name}
+                        onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
+                        placeholder="Expense name"
                       />
-                    </InputWrapper>
-                  </InputRow>
-                  <HelpText>Enter the amount you receive every two weeks after taxes and deductions</HelpText>
-                </>
-              ) : (
-                <VariableIncomeSection />
-              )}
-            </Section>
-
-            <Section>
-              <SectionTitle>
-                <CategoryIcon>🎯</CategoryIcon>
-                <h2>Savings Goal</h2>
-              </SectionTitle>
-              <Tooltip>
-                Setting aside money for savings is important for your financial health.
-              </Tooltip>
-              <InputRow>
-                <Label>
-                  Annual Savings Goal<RequiredField>*</RequiredField>
-                </Label>
-                <InputWrapper>
-                  <InputField
-                    type="number"
-                    name="savingsGoalYear"
-                    value={budgetData.savingsGoalYear}
-                    onChange={handleInputChange}
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    required
-                  />
-                </InputWrapper>
-              </InputRow>
-              <CalculatedRow>
-                <Label>Monthly Savings Target:</Label>
-                <Value>${calculatedData.savingsGoalMonth.toFixed(2)}</Value>
-              </CalculatedRow>
-              <InfoText small>
-                {(() => {
-                  const recommendedMonthly = calculatedData.monthlyIncome * 0.2;
-                  const currentPercentage = (calculatedData.savingsGoalMonth / calculatedData.monthlyIncome) * 100;
-                  const isBelow20Percent = calculatedData.savingsGoalMonth < recommendedMonthly;
-
-                  return (
-                    <>
-                      💡 Recommended savings (20% of income): ${recommendedMonthly.toFixed(2)}/month
-                      <br />
-                      <span style={{ 
-                        color: isBelow20Percent ? '#ff5252' : '#4caf50',
-                        fontWeight: '500',
-                        marginTop: '4px',
-                        display: 'inline-block'
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        gap: '10px'
                       }}>
-                        You're currently saving {currentPercentage.toFixed(1)}% of your income
-                        {isBelow20Percent ? ' (Consider increasing your savings)' : ' 👍'}
-                      </span>
-                    </>
-                  );
-                })()}
-              </InfoText>
-            </Section>
-          </Grid>
+                        <InputWrapper style={{ flex: 1 }}>
+                          <InputField
+                            type="number"
+                            value={expense.amount}
+                            onChange={(e) => handleExpenseChange(expense.id, 'amount', Number(e.target.value))}
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                          />
+                        </InputWrapper>
+                        <DeleteButton 
+                          onClick={() => deleteExpense(expense.id)} 
+                          title="Remove expense"
+                        >×</DeleteButton>
+                      </div>
+                    </div>
+                  </InputRow>
+                ))}
+                <AddButton onClick={addExpense}>+ Add Another Expense</AddButton>
+                
+                <SectionTitle>
+                  <CategoryIcon>🔄</CategoryIcon>
+                  <h3>Subscriptions</h3>
+                </SectionTitle>
+                {subscriptions.map(sub => (
+                  <InputRow key={sub.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
+                    <InputField
+                      type="text"
+                      value={sub.name}
+                      onChange={(e) => handleSubscriptionChange(sub.id, 'name', e.target.value)}
+                      style={{ 
+                        width: '100%',
+                        maxWidth: '200px',
+                        marginBottom: '5px'
+                      }}
+                      placeholder="Subscription name"
+                    />
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      flex: 1,
+                      minWidth: '150px'
+                    }}>
+                      <InputWrapper style={{ width: '100%' }}>
+                        <InputField
+                          type="number"
+                          value={sub.amount}
+                          onChange={(e) => handleSubscriptionChange(sub.id, 'amount', Number(e.target.value))}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                        />
+                      </InputWrapper>
+                      <DeleteButton 
+                        onClick={() => deleteSubscription(sub.id)} 
+                        title="Remove subscription"
+                        style={{ marginLeft: '10px' }}
+                      >×</DeleteButton>
+                    </div>
+                  </InputRow>
+                ))}
+                <AddButton onClick={addSubscription}>+ Add Subscription</AddButton>
+                <InfoText small>
+                  💡 Common subscriptions: Streaming services (Netflix, Spotify), 
+                  Cloud Storage, Gaming Services, News Subscriptions, Gym Memberships
+                </InfoText>
 
-          <BudgetTable>
-            <Section>
-              <SectionTitle>
-                <CategoryIcon>📊</CategoryIcon>
-                <h2>Monthly Expenses</h2>
-              </SectionTitle>
-              {expenses.map(expense => (
-                <InputRow key={expense.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
-                  <InputField
-                    type="text"
-                    value={expense.name}
-                    onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
-                    style={{ 
-                      width: '100%',  // Full width on mobile
-                      maxWidth: '200px',
-                      marginBottom: '5px'
-                    }}
-                    placeholder="Expense name"
-                  />
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    flex: 1,
-                    minWidth: '150px'  // Minimum width for amount input
-                  }}>
-                    <InputWrapper style={{ width: '100%' }}>
-                      <InputField
-                        type="number"
-                        value={expense.amount}
-                        onChange={(e) => handleExpenseChange(expense.id, 'amount', Number(e.target.value))}
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                      />
-                    </InputWrapper>
-                    <DeleteButton 
-                      onClick={() => deleteExpense(expense.id)} 
-                      title="Remove expense"
-                      style={{ marginLeft: '10px' }}
-                    >×</DeleteButton>
-                  </div>
-                </InputRow>
-              ))}
-              <AddButton onClick={addExpense}>+ Add Another Expense</AddButton>
-              
-              <SectionTitle>
-                <CategoryIcon>🔄</CategoryIcon>
-                <h3>Subscriptions</h3>
-              </SectionTitle>
-              {subscriptions.map(sub => (
-                <InputRow key={sub.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
-                  <InputField
-                    type="text"
-                    value={sub.name}
-                    onChange={(e) => handleSubscriptionChange(sub.id, 'name', e.target.value)}
-                    style={{ 
-                      width: '100%',
-                      maxWidth: '200px',
-                      marginBottom: '5px'
-                    }}
-                    placeholder="Subscription name"
-                  />
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    flex: 1,
-                    minWidth: '150px'
-                  }}>
-                    <InputWrapper style={{ width: '100%' }}>
-                      <InputField
-                        type="number"
-                        value={sub.amount}
-                        onChange={(e) => handleSubscriptionChange(sub.id, 'amount', Number(e.target.value))}
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                      />
-                    </InputWrapper>
-                    <DeleteButton 
-                      onClick={() => deleteSubscription(sub.id)} 
-                      title="Remove subscription"
-                      style={{ marginLeft: '10px' }}
-                    >×</DeleteButton>
-                  </div>
-                </InputRow>
-              ))}
-              <AddButton onClick={addSubscription}>+ Add Subscription</AddButton>
-              <InfoText small>
-                💡 Common subscriptions: Streaming services (Netflix, Spotify), 
-                Cloud Storage, Gaming Services, News Subscriptions, Gym Memberships
-              </InfoText>
-
-              <CalculatedRow>
-                <Label>Total monthly recurring expenses:</Label>
-                <Value>${calculatedData.totalMonthlyExpenses.toFixed(2)}</Value>
-              </CalculatedRow>
-              <CalculatedRow>
-                <Label>Money left after expenses:</Label>
-                <Value>${calculatedData.incomeAfterExpenses.toFixed(2)}</Value>
-              </CalculatedRow>
-            </Section>
-          </BudgetTable>
+                <CalculatedRow>
+                  <Label>Total monthly recurring expenses:</Label>
+                  <Value>${calculatedData.totalMonthlyExpenses.toFixed(2)}</Value>
+                </CalculatedRow>
+                <CalculatedRow>
+                  <Label>Money left after expenses:</Label>
+                  <Value>${calculatedData.incomeAfterExpenses.toFixed(2)}</Value>
+                </CalculatedRow>
+              </Section>
+            </Card>
+          </Card>
         </>
       ) : (
         <InvestmentGrowth annualSavings={budgetData.savingsGoalYear} />
