@@ -120,13 +120,11 @@ const InvestmentGrowth = ({ annualSavings }) => {
     for (let year = 1; year <= yearsToProject; year++) {
       totalContributed += annualSavings;
       balance = (balance + annualSavings) * (1 + annualReturn);
-      const realBalance = balance / Math.pow(1 + inflationRate, year);
 
       growth.push({
         year,
         totalContributed,
         balance: Math.round(balance),
-        realBalance: Math.round(realBalance),
         earnings: Math.round(balance - totalContributed)
       });
     }
@@ -166,7 +164,6 @@ const InvestmentGrowth = ({ annualSavings }) => {
               <th>Year</th>
               <th>Total Contributed</th>
               <th>Balance</th>
-              <th>After Inflation</th>
               <th>Investment Earnings</th>
             </tr>
           </thead>
@@ -176,7 +173,6 @@ const InvestmentGrowth = ({ annualSavings }) => {
                 <td>{row.year}</td>
                 <td>${row.totalContributed.toLocaleString()}</td>
                 <td>${row.balance.toLocaleString()}</td>
-                <td>${row.realBalance.toLocaleString()}</td>
                 <td>${row.earnings.toLocaleString()}</td>
               </tr>
             ))}
