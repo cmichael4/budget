@@ -106,7 +106,7 @@ const KeyMetric = styled.div`
   }
 `;
 
-const InputRow = styled.div`
+const StyledInputRow = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -320,7 +320,7 @@ const BudgetCalculator = () => {
         We recommend entering at least 3 months of data for accuracy.
       </InfoText>
       {variableIncomes.map((income, index) => (
-        <InputRow key={income.id}>
+        <StyledInputRow key={income.id}>
           <InputField
             type="month"
             value={income.date}
@@ -343,7 +343,7 @@ const BudgetCalculator = () => {
               title="Remove income entry"
             >×</DeleteButton>
           )}
-        </InputRow>
+        </StyledInputRow>
       ))}
       <AddButton onClick={addVariableIncome}>+ Add Another Month</AddButton>
       
@@ -502,7 +502,7 @@ const BudgetCalculator = () => {
 
                 {incomeType === 'fixed' ? (
                   <>
-                    <InputRow>
+                    <StyledInputRow>
                       <Label>
                         Biweekly Paycheck (After Tax)<RequiredField>*</RequiredField>
                       </Label>
@@ -518,7 +518,7 @@ const BudgetCalculator = () => {
                           required
                         />
                       </InputWrapper>
-                    </InputRow>
+                    </StyledInputRow>
                     <HelpText>Enter the amount you receive every two weeks after taxes and deductions</HelpText>
                   </>
                 ) : (
@@ -536,7 +536,7 @@ const BudgetCalculator = () => {
                 <Tooltip>
                   Setting aside money for savings is important for your financial health.
                 </Tooltip>
-                <InputRow>
+                <StyledInputRow>
                   <Label>
                     Annual Savings Goal<RequiredField>*</RequiredField>
                   </Label>
@@ -552,7 +552,7 @@ const BudgetCalculator = () => {
                       required
                     />
                   </InputWrapper>
-                </InputRow>
+                </StyledInputRow>
                 <CalculatedRow>
                   <Label>Monthly Savings Target:</Label>
                   <Value>${calculatedData.savingsGoalMonth.toFixed(2)}</Value>
@@ -590,7 +590,7 @@ const BudgetCalculator = () => {
                   <h2>Monthly Expenses</h2>
                 </SectionTitle>
                 {expenses.map(expense => (
-                  <InputRow key={expense.id}>
+                  <StyledInputRow key={expense.id}>
                     <div style={{ width: '100%' }}>
                       <InputField
                         type="text"
@@ -619,7 +619,7 @@ const BudgetCalculator = () => {
                         >×</DeleteButton>
                       </div>
                     </div>
-                  </InputRow>
+                  </StyledInputRow>
                 ))}
                 <AddButton onClick={addExpense}>+ Add Another Expense</AddButton>
                 
@@ -628,7 +628,7 @@ const BudgetCalculator = () => {
                   <h3>Subscriptions</h3>
                 </SectionTitle>
                 {subscriptions.map(sub => (
-                  <InputRow key={sub.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
+                  <StyledInputRow key={sub.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
                     <InputField
                       type="text"
                       value={sub.name}
@@ -662,7 +662,7 @@ const BudgetCalculator = () => {
                         style={{ marginLeft: '10px' }}
                       >×</DeleteButton>
                     </div>
-                  </InputRow>
+                  </StyledInputRow>
                 ))}
                 <AddButton onClick={addSubscription}>+ Add Subscription</AddButton>
                 <InfoText small>
