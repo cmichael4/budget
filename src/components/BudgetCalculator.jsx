@@ -355,16 +355,25 @@ const BudgetCalculator = () => {
             <h2>Monthly Expenses</h2>
           </SectionTitle>
           {expenses.map(expense => (
-            <InputRow key={expense.id}>
+            <InputRow key={expense.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
               <InputField
                 type="text"
                 value={expense.name}
                 onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
-                style={{ width: '150px', marginRight: '10px' }}
+                style={{ 
+                  width: '100%',  // Full width on mobile
+                  maxWidth: '200px',
+                  marginBottom: '5px'
+                }}
                 placeholder="Expense name"
               />
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <InputWrapper>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                flex: 1,
+                minWidth: '150px'  // Minimum width for amount input
+              }}>
+                <InputWrapper style={{ width: '100%' }}>
                   <InputField
                     type="number"
                     value={expense.amount}
@@ -374,7 +383,11 @@ const BudgetCalculator = () => {
                     min="0"
                   />
                 </InputWrapper>
-                <DeleteButton onClick={() => deleteExpense(expense.id)} title="Remove expense">×</DeleteButton>
+                <DeleteButton 
+                  onClick={() => deleteExpense(expense.id)} 
+                  title="Remove expense"
+                  style={{ marginLeft: '10px' }}
+                >×</DeleteButton>
               </div>
             </InputRow>
           ))}
@@ -385,16 +398,25 @@ const BudgetCalculator = () => {
             <h3>Subscriptions</h3>
           </SectionTitle>
           {subscriptions.map(sub => (
-            <InputRow key={sub.id}>
+            <InputRow key={sub.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
               <InputField
                 type="text"
                 value={sub.name}
                 onChange={(e) => handleSubscriptionChange(sub.id, 'name', e.target.value)}
-                style={{ width: '150px', marginRight: '10px' }}
+                style={{ 
+                  width: '100%',
+                  maxWidth: '200px',
+                  marginBottom: '5px'
+                }}
                 placeholder="Subscription name"
               />
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <InputWrapper>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                flex: 1,
+                minWidth: '150px'
+              }}>
+                <InputWrapper style={{ width: '100%' }}>
                   <InputField
                     type="number"
                     value={sub.amount}
@@ -404,7 +426,11 @@ const BudgetCalculator = () => {
                     min="0"
                   />
                 </InputWrapper>
-                <DeleteButton onClick={() => deleteSubscription(sub.id)} title="Remove subscription">×</DeleteButton>
+                <DeleteButton 
+                  onClick={() => deleteSubscription(sub.id)} 
+                  title="Remove subscription"
+                  style={{ marginLeft: '10px' }}
+                >×</DeleteButton>
               </div>
             </InputRow>
           ))}

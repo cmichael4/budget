@@ -22,16 +22,17 @@ export const BudgetTable = styled.div`
 
 export const InputRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background-color: #ffeb3b10;
-  margin: 8px 0;
-  border-radius: 8px;
-  transition: background-color 0.2s;
+  margin: 10px 0;
+  width: 100%;
   
-  &:hover {
-    background-color: #ffeb3b20;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    
+    ${InputWrapper} {
+      width: 100%;
+    }
   }
 `;
 
@@ -62,14 +63,15 @@ export const Value = styled.span`
 `;
 
 export const InputField = styled.input`
-  width: ${props => props.type === 'text' ? '150px' : '120px'};
-  padding: 8px 8px 8px ${props => props.type === 'number' ? '24px' : '8px'};
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  text-align: right;
-  font-size: 16px;
-  position: relative;
+  width: 100%;
   
+  @media (max-width: 768px) {
+    font-size: 16px; // Prevents zoom on iOS
+  }
+
   &:focus {
     outline: none;
     border-color: #4caf50;
@@ -88,7 +90,12 @@ export const InputField = styled.input`
 
 export const InputWrapper = styled.div`
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 
   &::before {
     content: '$';
