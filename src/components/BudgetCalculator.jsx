@@ -136,7 +136,7 @@ const StyledSelect = styled.select`
   }
 `;
 
-const AddButton = styled.button`
+const StyledAddButton = styled.button`
   background: none;
   border: 2px solid #4caf50;
   color: #4caf50;
@@ -160,7 +160,7 @@ const AddButton = styled.button`
   }
 `;
 
-const DeleteButton = styled.button`
+const StyledDeleteButton = styled.button`
   background: none;
   border: none;
   color: #ff5252;
@@ -185,7 +185,7 @@ const DeleteButton = styled.button`
   }
 `;
 
-const InputField = styled.input`
+const StyledInputField = styled.input`
   padding: 12px;
   padding-left: ${props => props.type === 'number' ? '24px' : '12px'};
   border: 1px solid #ddd;
@@ -321,14 +321,14 @@ const BudgetCalculator = () => {
       </InfoText>
       {variableIncomes.map((income, index) => (
         <StyledInputRow key={income.id}>
-          <InputField
+          <StyledInputField
             type="month"
             value={income.date}
             onChange={(e) => handleVariableIncomeChange(income.id, 'date', e.target.value)}
             style={{ width: '150px', marginRight: '10px' }}
           />
           <InputWrapper>
-            <InputField
+            <StyledInputField
               type="number"
               value={income.amount}
               onChange={(e) => handleVariableIncomeChange(income.id, 'amount', Number(e.target.value))}
@@ -338,14 +338,14 @@ const BudgetCalculator = () => {
             />
           </InputWrapper>
           {index > 0 && (
-            <DeleteButton 
+            <StyledDeleteButton 
               onClick={() => removeVariableIncome(income.id)}
               title="Remove income entry"
-            >×</DeleteButton>
+            >×</StyledDeleteButton>
           )}
         </StyledInputRow>
       ))}
-      <AddButton onClick={addVariableIncome}>+ Add Another Month</AddButton>
+      <StyledAddButton onClick={addVariableIncome}>+ Add Another Month</StyledAddButton>
       
       <CalculatedRow highlight>
         <Label>Average Monthly Income:</Label>
@@ -507,7 +507,7 @@ const BudgetCalculator = () => {
                         Biweekly Paycheck (After Tax)<RequiredField>*</RequiredField>
                       </Label>
                       <InputWrapper>
-                        <InputField
+                        <StyledInputField
                           type="number"
                           name="biweeklyPaycheck"
                           value={budgetData.biweeklyPaycheck}
@@ -541,7 +541,7 @@ const BudgetCalculator = () => {
                     Annual Savings Goal<RequiredField>*</RequiredField>
                   </Label>
                   <InputWrapper>
-                    <InputField
+                    <StyledInputField
                       type="number"
                       name="savingsGoalYear"
                       value={budgetData.savingsGoalYear}
@@ -592,7 +592,7 @@ const BudgetCalculator = () => {
                 {expenses.map(expense => (
                   <StyledInputRow key={expense.id}>
                     <div style={{ width: '100%' }}>
-                      <InputField
+                      <StyledInputField
                         type="text"
                         value={expense.name}
                         onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
@@ -604,7 +604,7 @@ const BudgetCalculator = () => {
                         gap: '10px'
                       }}>
                         <InputWrapper style={{ flex: 1 }}>
-                          <InputField
+                          <StyledInputField
                             type="number"
                             value={expense.amount}
                             onChange={(e) => handleExpenseChange(expense.id, 'amount', Number(e.target.value))}
@@ -613,15 +613,15 @@ const BudgetCalculator = () => {
                             min="0"
                           />
                         </InputWrapper>
-                        <DeleteButton 
+                        <StyledDeleteButton 
                           onClick={() => deleteExpense(expense.id)} 
                           title="Remove expense"
-                        >×</DeleteButton>
+                        >×</StyledDeleteButton>
                       </div>
                     </div>
                   </StyledInputRow>
                 ))}
-                <AddButton onClick={addExpense}>+ Add Another Expense</AddButton>
+                <StyledAddButton onClick={addExpense}>+ Add Another Expense</StyledAddButton>
                 
                 <SectionTitle>
                   <CategoryIcon>🔄</CategoryIcon>
@@ -629,7 +629,7 @@ const BudgetCalculator = () => {
                 </SectionTitle>
                 {subscriptions.map(sub => (
                   <StyledInputRow key={sub.id} style={{ flexWrap: 'wrap', gap: '10px' }}>
-                    <InputField
+                    <StyledInputField
                       type="text"
                       value={sub.name}
                       onChange={(e) => handleSubscriptionChange(sub.id, 'name', e.target.value)}
@@ -647,7 +647,7 @@ const BudgetCalculator = () => {
                       minWidth: '150px'
                     }}>
                       <InputWrapper style={{ width: '100%' }}>
-                        <InputField
+                        <StyledInputField
                           type="number"
                           value={sub.amount}
                           onChange={(e) => handleSubscriptionChange(sub.id, 'amount', Number(e.target.value))}
@@ -656,15 +656,15 @@ const BudgetCalculator = () => {
                           min="0"
                         />
                       </InputWrapper>
-                      <DeleteButton 
+                      <StyledDeleteButton 
                         onClick={() => deleteSubscription(sub.id)} 
                         title="Remove subscription"
                         style={{ marginLeft: '10px' }}
-                      >×</DeleteButton>
+                      >×</StyledDeleteButton>
                     </div>
                   </StyledInputRow>
                 ))}
-                <AddButton onClick={addSubscription}>+ Add Subscription</AddButton>
+                <StyledAddButton onClick={addSubscription}>+ Add Subscription</StyledAddButton>
                 <InfoText small>
                   💡 Common subscriptions: Streaming services (Netflix, Spotify), 
                   Cloud Storage, Gaming Services, News Subscriptions, Gym Memberships
