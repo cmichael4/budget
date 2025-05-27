@@ -2,6 +2,7 @@
   "name": "budget-calculator",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://cmichael4.github.io/budget",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -34,7 +35,6 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://cmichael4.github.io/budget",
   "devDependencies": {
     "gh-pages": "^6.3.0"
   }

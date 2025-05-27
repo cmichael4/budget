@@ -4,6 +4,7 @@ export const InputWrapper = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
   
   @media (max-width: 768px) {
     width: 100%;
@@ -12,7 +13,7 @@ export const InputWrapper = styled.div`
   &::before {
     content: '$';
     position: absolute;
-    left: 8px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: #666;
@@ -24,7 +25,10 @@ export const InputRow = styled.div`
   display: flex;
   align-items: center;
   margin: 10px 0;
-  width: 100%;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  gap: 10px;
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -83,28 +87,18 @@ export const Value = styled.span`
 `;
 
 export const InputField = styled.input`
-  padding: 8px;
+  padding: 12px;
+  padding-left: ${props => props.type === 'number' ? '24px' : '12px'};
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px;
   width: 100%;
+  font-size: 16px;
+  background: white;
   
-  @media (max-width: 768px) {
-    font-size: 16px; // Prevents zoom on iOS
-  }
-
   &:focus {
     outline: none;
     border-color: #4caf50;
-  }
-
-  &[type='number'] {
-    -moz-appearance: textfield;
-  }
-
-  &[type='number']::-webkit-outer-spin-button,
-  &[type='number']::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    box-shadow: 0 0 0 2px #4caf5020;
   }
 `;
 
@@ -126,11 +120,15 @@ export const DeleteButton = styled.button`
   background: none;
   border: none;
   color: #ff5252;
-  font-size: 22px;
+  font-size: 20px;
   cursor: pointer;
-  padding: 4px 12px;
-  margin-left: 8px;
-  border-radius: 4px;
+  padding: 8px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
   
   &:hover {
@@ -143,25 +141,19 @@ export const AddButton = styled.button`
   background: none;
   border: 2px solid #4caf50;
   color: #4caf50;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
   cursor: pointer;
-  margin: 15px 0;
+  margin: 20px 0;
   font-weight: 500;
   transition: all 0.2s;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   
   &:hover {
-    background: #4caf5020;
+    background: #4caf5010;
     transform: translateY(-1px);
-  }
-
-  &:before {
-    content: '+';
-    font-size: 20px;
-    margin-right: 4px;
   }
 `;
 
