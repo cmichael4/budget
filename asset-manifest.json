@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/budget/static/js/main.6ad4248c.js",
+    "index.html": "/budget/index.html",
+    "main.6ad4248c.js.map": "/budget/static/js/main.6ad4248c.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.6ad4248c.js"
+  ]
+}
