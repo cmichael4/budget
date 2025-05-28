@@ -1168,30 +1168,6 @@ const BudgetCalculator = () => {
             </Tab>
           ))}
         </TabContainer>
-
-        <Card style={{ background: '#f8f9fa', border: '1px dashed #4caf50' }}>
-          <SectionTitle>
-            <CategoryIcon>⭐</CategoryIcon>
-            <h3>Premium Features</h3>
-          </SectionTitle>
-          <div style={{ opacity: 0.7 }}>
-            • AI-powered insights<br />
-            • Custom strategies<br />
-            • Bill reminders<br />
-            • Investment tools<br />
-            • Export reports
-            <StyledAddButton 
-              style={{ 
-                background: '#4caf50', 
-                color: 'white',
-                width: '100%',
-                marginTop: '12px'
-              }}
-            >
-              Upgrade to Pro
-            </StyledAddButton>
-          </div>
-        </Card>
       </Sidebar>
 
       {/* Main Content */}
