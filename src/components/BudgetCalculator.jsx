@@ -425,6 +425,7 @@ const TABS = [
   { id: 'overview', icon: '📊', label: 'Overview' },
   { id: 'budget', icon: '💰', label: 'Budget' },
   { id: 'insights', icon: '💡', label: 'Insights' },
+  { id: 'investments', icon: '📈', label: 'Investments' },
   { id: 'admin', icon: '⚙️', label: 'Admin', requiresAuth: true }
 ];
 
@@ -548,6 +549,8 @@ const BudgetCalculator = () => {
     hasViewedInsights: false
   });
 
+  const [analyticsError, setAnalyticsError] = useState(null);
+
   useEffect(() => {
     calculateBudget();
   }, [budgetData, expenses, variableIncomes, incomeType, subscriptions, additionalIncomes]);
@@ -569,6 +572,7 @@ const BudgetCalculator = () => {
       console.log("Firebase DB object:", db);
       if (!db) {
         console.log("Firebase DB not initialized");
+        setAnalyticsError("Analytics not initialized");
         return;
       }
       
@@ -584,6 +588,7 @@ const BudgetCalculator = () => {
             console.log("PageViews data initialized");
           }).catch(error => {
             console.error("Error initializing pageViews:", error);
+            setAnalyticsError("Error initializing analytics");
           });
         }
       }, { onlyOnce: true });
@@ -593,6 +598,9 @@ const BudgetCalculator = () => {
         const currentViews = snapshot.val();
         console.log("Current views from Firebase:", currentViews);
         setViewCount(currentViews || 0);
+      }, (error) => {
+        console.error("Error reading view count:", error);
+        setAnalyticsError("Error reading analytics");
       });
 
       // Check if we should count this visit
@@ -609,7 +617,6 @@ const BudgetCalculator = () => {
         return (currentViews || 0) + 1;
       }).then(() => {
         console.log("View count incremented successfully");
-        
         // Save visit data
         const visitData = {
           timestamp: new Date().toISOString(),
@@ -649,6 +656,7 @@ const BudgetCalculator = () => {
               })
               .catch(error => {
                 console.error("Error saving visit data:", error);
+                setAnalyticsError("Error saving visit data");
               });
           })
           .catch((error) => {
@@ -663,14 +671,17 @@ const BudgetCalculator = () => {
               })
               .catch(error => {
                 console.error("Error saving basic visit data:", error);
+                setAnalyticsError("Error saving basic visit data");
               });
           });
       }).catch(error => {
         console.error("Error in view count transaction:", error);
+        setAnalyticsError("Error incrementing view count");
       });
 
     } catch (error) {
       console.error("Error in analytics setup:", error, error.stack);
+      setAnalyticsError("Error initializing analytics");
     }
   }, []);
 
@@ -1231,6 +1242,13 @@ const BudgetCalculator = () => {
           </>
         );
 
+      case 'investments':
+        return (
+          <Card>
+            <InvestmentGrowth annualSavings={budgetData.savingsGoalYear || 0} />
+          </Card>
+        );
+
       case 'admin':
         return isAdminAuthenticated ? (
           <AdminDashboard />
@@ -1289,6 +1307,12 @@ const BudgetCalculator = () => {
             Views: {viewCount}
           </div>
         </div>
+
+        {analyticsError && (
+          <div style={{ color: '#ff5252', fontSize: '13px', marginTop: '8px' }}>
+            ⚠️ Analytics error: {analyticsError}
+          </div>
+        )}
 
         <TabContainer>
           {TABS.map(tab => (
