@@ -31,16 +31,16 @@ import SpendingAnalytics from './SpendingAnalytics';
 
 const TabContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   }
 `;
 
 const Tab = styled.button`
-  padding: 12px;
+  padding: 12px 8px;
   border: none;
   background: ${props => props.$active ? '#2e7d32' : '#f5f5f5'};
   color: ${props => props.$active ? 'white' : '#333'};
@@ -48,11 +48,17 @@ const Tab = styled.button`
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  min-height: 48px;
+
+  @media (min-width: 768px) {
+    padding: 12px;
+    font-size: 14px;
+  }
 
   &:hover {
     background: ${props => props.$active ? '#2e7d32' : '#e0e0e0'};
@@ -62,14 +68,13 @@ const Tab = styled.button`
 const Card = styled.div`
   background: white;
   border-radius: 12px;
-  padding: 20px;
-  margin: 12px 0;
+  padding: 16px;
+  margin: 8px 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   
-  @media (min-width: 1024px) {
-    &.main-content {
-      margin-top: 0;
-    }
+  @media (min-width: 768px) {
+    padding: 20px;
+    margin: 12px 0;
   }
 `;
 
@@ -284,12 +289,13 @@ const StyledInputField = styled.input`
 const AppContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 24px;
 
   @media (min-width: 1024px) {
+    padding: 24px;
     flex-direction: row;
     align-items: flex-start;
     
@@ -302,6 +308,13 @@ const AppContainer = styled.div`
     
     .main-content {
       flex: 1;
+      margin-left: 24px;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .sidebar {
+      margin-bottom: 20px;
     }
   }
 `;
@@ -349,11 +362,24 @@ const TipBanner = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 15px;
   }
   
   .content {
     color: #666;
-    line-height: 1.5;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    padding: 14px;
+    
+    .title {
+      font-size: 14px;
+    }
+    
+    .content {
+      font-size: 13px;
+    }
   }
 `;
 
@@ -367,10 +393,31 @@ const ActionButton = styled.button`
   cursor: pointer;
   margin-top: 12px;
   transition: all 0.2s;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     opacity: 0.9;
     transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+`;
+
+const MetricsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  
+  @media (min-width: 600px) {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
   }
 `;
 
@@ -842,7 +889,7 @@ const BudgetCalculator = () => {
                 <CategoryIcon>💰</CategoryIcon>
                 <h2>Quick Budget Summary</h2>
               </SectionTitle>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+              <MetricsGrid>
                 <KeyMetric>
                   <div className="label">Monthly Income</div>
                   <div className="value">${calculatedData.monthlyIncome.toFixed(2)}</div>
@@ -858,7 +905,7 @@ const BudgetCalculator = () => {
                   <div className="value" style={{ color: '#4caf50' }}>${calculatedData.discretionaryDay.toFixed(2)}</div>
                   <div className="sublabel">for flexible spending</div>
                 </KeyMetric>
-              </div>
+              </MetricsGrid>
             </Card>
 
             <Card>
@@ -866,7 +913,11 @@ const BudgetCalculator = () => {
                 <CategoryIcon>📅</CategoryIcon>
                 <h2>Spending Breakdown</h2>
               </SectionTitle>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                gap: '12px' 
+              }}>
                 <Highlight>
                   <h3>Weekly Budget</h3>
                   <div className="amount">${calculatedData.discretionaryWeek.toFixed(2)}</div>
