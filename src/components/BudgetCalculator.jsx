@@ -428,7 +428,59 @@ const TABS = [
   { id: 'admin', icon: '⚙️', label: 'Admin', requiresAuth: true }
 ];
 
+const EmptyState = ({ type, onAddExpense }) => {
+  switch (type) {
+    case 'expenses':
+      return (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '32px 16px',
+          background: '#f8f9fa',
+          borderRadius: '8px',
+          margin: '20px 0'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
+          <h3 style={{ marginBottom: '8px' }}>No Expenses Added Yet</h3>
+          <p style={{ color: '#666', marginBottom: '16px' }}>
+            Start by adding your monthly expenses like rent, utilities, and groceries
+          </p>
+          <ActionButton $primary onClick={onAddExpense}>
+            Add Your First Expense
+          </ActionButton>
+        </div>
+      );
+    
+    case 'income':
+      return (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '32px 16px',
+          background: '#f8f9fa',
+          borderRadius: '8px',
+          margin: '20px 0'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>💰</div>
+          <h3 style={{ marginBottom: '8px' }}>Enter Your Income</h3>
+          <p style={{ color: '#666', marginBottom: '16px' }}>
+            Let's start by entering your after-tax monthly income
+          </p>
+        </div>
+      );
+    
+    default:
+      return null;
+  }
+};
+
 const BudgetCalculator = () => {
+  const clearAllData = () => {
+    localStorage.removeItem('budgetData');
+    localStorage.removeItem('expenses');
+    localStorage.removeItem('additionalIncomes');
+    localStorage.removeItem('userProgress');
+    window.location.reload(); // Force reload to reset state
+  };
+
   const loadFromLocalStorage = () => {
     try {
       const savedBudgetData = localStorage.getItem('budgetData');
@@ -437,42 +489,34 @@ const BudgetCalculator = () => {
 
       return {
         budgetData: savedBudgetData ? JSON.parse(savedBudgetData) : {
-          biweeklyPaycheck: 2400,
-          savingsGoalYear: 10000
+          biweeklyPaycheck: '',
+          savingsGoalYear: ''
         },
-        expenses: savedExpenses ? JSON.parse(savedExpenses) : [
-          { id: 1, name: 'Rent', amount: 1500 },
-          { id: 2, name: 'Wifi', amount: 80 },
-          { id: 3, name: 'Electric', amount: 500 },
-          { id: 4, name: 'Groceries', amount: 400 },
-          { id: 5, name: 'Loans', amount: 300 }
-        ],
+        expenses: savedExpenses ? JSON.parse(savedExpenses) : [],
         additionalIncomes: savedAdditionalIncomes ? JSON.parse(savedAdditionalIncomes) : []
       };
     } catch (error) {
       console.error('Error loading from localStorage:', error);
-      return null;
+      return {
+        budgetData: {
+          biweeklyPaycheck: '',
+          savingsGoalYear: ''
+        },
+        expenses: [],
+        additionalIncomes: []
+      };
     }
   };
 
   const savedData = loadFromLocalStorage();
   const [budgetData, setBudgetData] = useState(savedData?.budgetData || {
-    biweeklyPaycheck: 2400,
-    savingsGoalYear: 10000
+    biweeklyPaycheck: '',
+    savingsGoalYear: ''
   });
 
-  const [expenses, setExpenses] = useState(savedData?.expenses || [
-    { id: 1, name: 'Rent', amount: 1500 },
-    { id: 2, name: 'Wifi', amount: 80 },
-    { id: 3, name: 'Electric', amount: 500 },
-    { id: 4, name: 'Groceries', amount: 400 },
-    { id: 5, name: 'Loans', amount: 300 }
-  ]);
+  const [expenses, setExpenses] = useState(savedData?.expenses || []);
 
-  const [subscriptions, setSubscriptions] = useState([
-    { id: 1, name: 'Netflix', amount: 15 },
-    { id: 2, name: 'Spotify', amount: 10 }
-  ]);
+  const [subscriptions, setSubscriptions] = useState([]);
 
   const [calculatedData, setCalculatedData] = useState({
     monthlyIncome: 0,
@@ -485,9 +529,7 @@ const BudgetCalculator = () => {
   });
 
   const [incomeType, setIncomeType] = useState('fixed'); // 'fixed', 'variable'
-  const [variableIncomes, setVariableIncomes] = useState([
-    { id: 1, amount: 0, date: '' }
-  ]);
+  const [variableIncomes, setVariableIncomes] = useState([]);
 
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -873,70 +915,69 @@ const BudgetCalculator = () => {
               </TipBanner>
             )}
             
-            {userProgress.hasEnteredIncome && !userProgress.hasAddedExpense && (
-              <TipBanner $type="success">
-                <div className="title">
-                  ✨ Great start with your income!
-                </div>
-                <div className="content">
-                  Now let's track your monthly expenses to see where your money is going.
-                </div>
-              </TipBanner>
+            {budgetData.biweeklyPaycheck === '' ? (
+              <Card>
+                <EmptyState type="income" />
+              </Card>
+            ) : (
+              <>
+                <Card>
+                  <SectionTitle>
+                    <CategoryIcon>💰</CategoryIcon>
+                    <h2>Quick Budget Summary</h2>
+                  </SectionTitle>
+                  <MetricsGrid>
+                    <KeyMetric>
+                      <div className="label">Monthly Income</div>
+                      <div className="value">${calculatedData.monthlyIncome.toFixed(2)}</div>
+                      <div className="sublabel">after taxes</div>
+                    </KeyMetric>
+                    <KeyMetric>
+                      <div className="label">Monthly Expenses</div>
+                      <div className="value" style={{ color: '#ff5252' }}>${calculatedData.totalMonthlyExpenses.toFixed(2)}</div>
+                      <div className="sublabel">bills & necessities</div>
+                    </KeyMetric>
+                    <KeyMetric>
+                      <div className="label">Available Daily Budget</div>
+                      <div className="value" style={{ color: '#4caf50' }}>${calculatedData.discretionaryDay.toFixed(2)}</div>
+                      <div className="sublabel">for flexible spending</div>
+                    </KeyMetric>
+                  </MetricsGrid>
+                </Card>
+
+                <Card>
+                  <SectionTitle>
+                    <CategoryIcon>📅</CategoryIcon>
+                    <h2>Spending Breakdown</h2>
+                  </SectionTitle>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                    gap: '12px' 
+                  }}>
+                    <Highlight>
+                      <h3>Weekly Budget</h3>
+                      <div className="amount">${calculatedData.discretionaryWeek.toFixed(2)}</div>
+                      <div className="sublabel">for discretionary spending</div>
+                    </Highlight>
+                    <Highlight>
+                      <h3>Monthly Savings</h3>
+                      <div className="amount">${calculatedData.savingsGoalMonth.toFixed(2)}</div>
+                      <div className="sublabel">towards your goals</div>
+                    </Highlight>
+                    <Highlight>
+                      <h3>Emergency Fund</h3>
+                      <div className="amount">${(calculatedData.totalMonthlyExpenses * 6).toFixed(2)}</div>
+                      <div className="sublabel">recommended 6-month buffer</div>
+                    </Highlight>
+                  </div>
+                </Card>
+              </>
             )}
 
-            <Card>
-              <SectionTitle>
-                <CategoryIcon>💰</CategoryIcon>
-                <h2>Quick Budget Summary</h2>
-              </SectionTitle>
-              <MetricsGrid>
-                <KeyMetric>
-                  <div className="label">Monthly Income</div>
-                  <div className="value">${calculatedData.monthlyIncome.toFixed(2)}</div>
-                  <div className="sublabel">after taxes</div>
-                </KeyMetric>
-                <KeyMetric>
-                  <div className="label">Monthly Expenses</div>
-                  <div className="value" style={{ color: '#ff5252' }}>${calculatedData.totalMonthlyExpenses.toFixed(2)}</div>
-                  <div className="sublabel">bills & necessities</div>
-                </KeyMetric>
-                <KeyMetric>
-                  <div className="label">Available Daily Budget</div>
-                  <div className="value" style={{ color: '#4caf50' }}>${calculatedData.discretionaryDay.toFixed(2)}</div>
-                  <div className="sublabel">for flexible spending</div>
-                </KeyMetric>
-              </MetricsGrid>
-            </Card>
-
-            <Card>
-              <SectionTitle>
-                <CategoryIcon>📅</CategoryIcon>
-                <h2>Spending Breakdown</h2>
-              </SectionTitle>
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
-                gap: '12px' 
-              }}>
-                <Highlight>
-                  <h3>Weekly Budget</h3>
-                  <div className="amount">${calculatedData.discretionaryWeek.toFixed(2)}</div>
-                  <div className="sublabel">for discretionary spending</div>
-                </Highlight>
-                <Highlight>
-                  <h3>Monthly Savings</h3>
-                  <div className="amount">${calculatedData.savingsGoalMonth.toFixed(2)}</div>
-                  <div className="sublabel">towards your goals</div>
-                </Highlight>
-                <Highlight>
-                  <h3>Emergency Fund</h3>
-                  <div className="amount">${(calculatedData.totalMonthlyExpenses * 6).toFixed(2)}</div>
-                  <div className="sublabel">recommended 6-month buffer</div>
-                </Highlight>
-              </div>
-            </Card>
-
-            <BankLink onAccountsLinked={handleAccountsLinked} />
+            {budgetData.biweeklyPaycheck !== '' && (
+              <BankLink onAccountsLinked={handleAccountsLinked} />
+            )}
           </>
         );
 
@@ -949,31 +990,10 @@ const BudgetCalculator = () => {
               </div>
               <div className="content">
                 • Enter your after-tax income for accurate calculations<br />
-                • Don't forget recurring subscriptions and bills<br />
-                • Include estimated variable expenses like groceries<br />
-                • Consider seasonal expenses (divide annual costs by 12)
+                • Add your regular monthly expenses<br />
+                • Don't forget recurring bills and subscriptions
               </div>
             </TipBanner>
-
-            {expenses.length >= 3 && !userProgress.hasViewedInsights && (
-              <TipBanner $type="success">
-                <div className="title">
-                  🎯 Ready for Insights!
-                </div>
-                <div className="content">
-                  You've added enough data for us to analyze your spending patterns
-                  and provide personalized recommendations.
-                  <br />
-                  <ActionButton 
-                    $primary 
-                    onClick={() => setActiveTab('insights')}
-                    style={{ marginTop: '12px' }}
-                  >
-                    View Insights →
-                  </ActionButton>
-                </div>
-              </TipBanner>
-            )}
 
             <Card>
               <Section>
@@ -981,6 +1001,7 @@ const BudgetCalculator = () => {
                   <CategoryIcon>💸</CategoryIcon>
                   <h2>Income Sources</h2>
                 </SectionTitle>
+                {budgetData.biweeklyPaycheck === '' && <EmptyState type="income" />}
                 <StyledInputRow>
                   <Label>
                     Paycheck Amount (After Taxes)<RequiredField>*</RequiredField>
@@ -998,7 +1019,58 @@ const BudgetCalculator = () => {
                     />
                   </InputWrapper>
                 </StyledInputRow>
-                {/* Additional income inputs */}
+
+                {/* Additional Income Section */}
+                <SectionTitle style={{ marginTop: '24px', fontSize: '16px' }}>
+                  <CategoryIcon>➕</CategoryIcon>
+                  <span>Additional Income</span>
+                </SectionTitle>
+                {additionalIncomes.length === 0 && (
+                  <InfoText $small $center>No additional income sources added yet.</InfoText>
+                )}
+                {additionalIncomes.map((income, idx) => (
+                  <StyledInputRow key={income.id}>
+                    <Label>Source</Label>
+                    <div style={{ flex: 1 }}>
+                      <StyledInputField
+                        type="text"
+                        value={income.name}
+                        onChange={e => handleAdditionalIncomeChange(income.id, 'name', e.target.value)}
+                        placeholder="e.g. Side gig, rental, etc."
+                      />
+                    </div>
+                    <Label>Amount</Label>
+                    <InputWrapper>
+                      <StyledInputField
+                        type="number"
+                        value={income.amount || ''}
+                        onChange={e => handleAdditionalIncomeChange(income.id, 'amount', e.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                      />
+                    </InputWrapper>
+                    <Label>Frequency</Label>
+                    <div style={{ flex: 1 }}>
+                      <StyledSelect
+                        value={income.frequency}
+                        onChange={e => handleAdditionalIncomeChange(income.id, 'frequency', e.target.value)}
+                      >
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Biweekly</option>
+                        <option value="yearly">Yearly</option>
+                      </StyledSelect>
+                    </div>
+                    <StyledDeleteButton
+                      onClick={() => deleteAdditionalIncome(income.id)}
+                      title="Remove income source"
+                    >×</StyledDeleteButton>
+                  </StyledInputRow>
+                ))}
+                <StyledAddButton onClick={addAdditionalIncome}>
+                  + Add Additional Income
+                </StyledAddButton>
               </Section>
             </Card>
 
@@ -1006,89 +1078,106 @@ const BudgetCalculator = () => {
               <Section>
                 <SectionTitle>
                   <CategoryIcon>💳</CategoryIcon>
-                  <h2>Monthly Expenses</h2>
+                  <h2>Monthly Recurring Expenses</h2>
                 </SectionTitle>
-                {expenses.map(expense => (
-                  <StyledInputRow key={expense.id}>
-                    <InputGroup>
-                      <StyledInputField
-                        type="text"
-                        value={expense.name}
-                        onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
-                        placeholder="What's this expense for?"
-                      />
-                      <AmountInputGroup>
-                        <span className="currency-symbol">$</span>
-                        <StyledInputField
-                          type="number"
-                          value={expense.amount || ''}
-                          onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
-                          placeholder="0.00"
-                          step="0.01"
-                          min="0"
-                        />
-                      </AmountInputGroup>
-                      <StyledDeleteButton 
-                        onClick={() => deleteExpense(expense.id)}
-                        title="Remove expense"
-                      >×</StyledDeleteButton>
-                    </InputGroup>
-                  </StyledInputRow>
-                ))}
-                <StyledAddButton onClick={addExpense}>
-                  + Add Expense
-                </StyledAddButton>
+                <InfoText $small $center style={{ marginBottom: '12px', color: '#2e7d32' }}>
+                  List your regular monthly bills here. This means things you pay every month, like rent, phone, car payment, insurance, utilities, or groceries.<br />
+                  <span style={{ color: '#ff9800' }}>Don't add spending money for things like eating out, shopping, or fun. We'll help you plan for that in your daily budget.</span>
+                </InfoText>
+                {expenses.length === 0 ? (
+                  <EmptyState type="expenses" onAddExpense={addExpense} />
+                ) : (
+                  <>
+                    {expenses.map(expense => (
+                      <StyledInputRow key={expense.id}>
+                        <InputGroup>
+                          <StyledInputField
+                            type="text"
+                            value={expense.name}
+                            onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
+                            placeholder="e.g. Rent, Phone, Car, Groceries"
+                          />
+                          <AmountInputGroup>
+                            <span className="currency-symbol">$</span>
+                            <StyledInputField
+                              type="number"
+                              value={expense.amount || ''}
+                              onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
+                              placeholder="0.00"
+                              step="0.01"
+                              min="0"
+                            />
+                          </AmountInputGroup>
+                          <StyledDeleteButton 
+                            onClick={() => deleteExpense(expense.id)}
+                            title="Remove expense"
+                          >×</StyledDeleteButton>
+                        </InputGroup>
+                      </StyledInputRow>
+                    ))}
+                    <StyledAddButton onClick={addExpense}>
+                      + Add Another Expense
+                    </StyledAddButton>
+                  </>
+                )}
               </Section>
             </Card>
+
+            {/* Navigation Buttons for Budget Step */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
+              <ActionButton onClick={() => setActiveTab('overview')}>
+                ← Back to Overview
+              </ActionButton>
+              <ActionButton
+                $primary
+                onClick={() => setActiveTab('insights')}
+                disabled={budgetData.biweeklyPaycheck === '' || expenses.length === 0}
+                title={budgetData.biweeklyPaycheck === '' || expenses.length === 0 ? 'Please enter your income and at least one expense to continue' : ''}
+              >
+                Next: See Insights →
+              </ActionButton>
+            </div>
           </>
         );
 
       case 'insights':
         return (
           <>
-            {!userProgress.hasViewedInsights && (
-              <TipBanner $type="info">
-                <div className="title">
-                  📊 Understanding Your Analysis
-                </div>
-                <div className="content">
-                  We analyze your spending patterns and compare them to recommended
-                  financial guidelines. Look for opportunities to optimize your budget
-                  and build long-term financial health.
-                </div>
-              </TipBanner>
-            )}
+            {budgetData.biweeklyPaycheck === '' ? (
+              <Card>
+                <EmptyState type="income" />
+              </Card>
+            ) : expenses.length === 0 ? (
+              <Card>
+                <EmptyState type="expenses" onAddExpense={addExpense} />
+              </Card>
+            ) : (
+              <>
+                {!userProgress.hasViewedInsights && (
+                  <TipBanner $type="info">
+                    <div className="title">
+                      📊 Understanding Your Analysis
+                    </div>
+                    <div className="content">
+                      We analyze your spending patterns and compare them to recommended
+                      financial guidelines. Look for opportunities to optimize your budget
+                      and build long-term financial health.
+                    </div>
+                  </TipBanner>
+                )}
 
-            {calculatedData.savingsRate < 20 && (
-              <TipBanner $type="warning">
-                <div className="title">
-                  💫 Boost Your Savings
-                </div>
-                <div className="content">
-                  Your current savings rate is {calculatedData.savingsRate.toFixed(1)}%.
-                  Try the 50/30/20 rule: 50% needs, 30% wants, and 20% savings.
-                  Small changes can make a big difference!
-                  <br />
-                  <ActionButton 
-                    onClick={() => setActiveTab('budget')}
-                    style={{ marginTop: '12px' }}
-                  >
-                    Review Budget →
-                  </ActionButton>
-                </div>
-              </TipBanner>
+                <Card>
+                  <SectionTitle>
+                    <CategoryIcon>📊</CategoryIcon>
+                    <h2>Budget Analysis & Recommendations</h2>
+                  </SectionTitle>
+                  <SpendingAnalytics 
+                    expenses={expenses} 
+                    monthlyIncome={calculatedData.monthlyIncome} 
+                  />
+                </Card>
+              </>
             )}
-
-            <Card>
-              <SectionTitle>
-                <CategoryIcon>📊</CategoryIcon>
-                <h2>Budget Analysis & Recommendations</h2>
-              </SectionTitle>
-              <SpendingAnalytics 
-                expenses={expenses} 
-                monthlyIncome={calculatedData.monthlyIncome} 
-              />
-            </Card>
           </>
         );
 
