@@ -753,7 +753,7 @@ const BudgetCalculator = () => {
 
   const addExpense = () => {
     const newId = Math.max(...expenses.map(e => e.id), 0) + 1;
-    setExpenses(prev => [...prev, { id: newId, name: 'New Expense', amount: 0 }]);
+    setExpenses(prev => [...prev, { id: newId, name: '', amount: 0 }]);
   };
 
   const addSubscription = () => {
@@ -1071,6 +1071,56 @@ const BudgetCalculator = () => {
                 <StyledAddButton onClick={addAdditionalIncome}>
                   + Add Additional Income
                 </StyledAddButton>
+              </Section>
+            </Card>
+
+            <Card>
+              <Section>
+                <SectionTitle>
+                  <CategoryIcon>💾</CategoryIcon>
+                  <h2>Savings Goal</h2>
+                </SectionTitle>
+                <InfoText $small $center style={{ marginBottom: '12px', color: '#2e7d32' }}>
+                  Set a goal for how much you want to save. You can enter a yearly or monthly amount.
+                </InfoText>
+                <StyledInputRow>
+                  <Label>
+                    Yearly Savings Goal
+                  </Label>
+                  <InputWrapper>
+                    <StyledInputField
+                      type="number"
+                      name="savingsGoalYear"
+                      value={budgetData.savingsGoalYear || ''}
+                      onChange={handleInputChange}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                    />
+                  </InputWrapper>
+                  <Label>
+                    (or Monthly)
+                  </Label>
+                  <InputWrapper>
+                    <StyledInputField
+                      type="number"
+                      name="savingsGoalMonth"
+                      value={budgetData.savingsGoalMonth || ''}
+                      onChange={e => {
+                        // Update yearly goal based on monthly input
+                        const monthVal = parseFloat(e.target.value) || 0;
+                        setBudgetData(prev => ({
+                          ...prev,
+                          savingsGoalMonth: monthVal,
+                          savingsGoalYear: monthVal * 12
+                        }));
+                      }}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                    />
+                  </InputWrapper>
+                </StyledInputRow>
               </Section>
             </Card>
 
