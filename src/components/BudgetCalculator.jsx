@@ -1004,7 +1004,7 @@ const BudgetCalculator = () => {
                 {budgetData.biweeklyPaycheck === '' && <EmptyState type="income" />}
                 <StyledInputRow>
                   <Label>
-                    Paycheck Amount (After Taxes)<RequiredField>*</RequiredField>
+                    Biweekly Paycheck Amount (After Taxes)<RequiredField>*</RequiredField>
                   </Label>
                   <InputWrapper>
                     <StyledInputField
