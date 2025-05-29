@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import BudgetCalculator from './components/BudgetCalculator';
 import { createGlobalStyle } from 'styled-components';
+import { initGA, trackPageView } from './services/analytics';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -13,6 +14,25 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 function App() {
+  useEffect(() => {
+    // Initialize GA
+    initGA();
+    
+    // Track initial page view
+    trackPageView(window.location.pathname);
+    
+    // Track subsequent page views
+    const handleRouteChange = () => {
+      trackPageView(window.location.pathname);
+    };
+    
+    window.addEventListener('popstate', handleRouteChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, []);
+
   return (
     <div className="App">
       <GlobalStyle />

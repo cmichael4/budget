@@ -159,15 +159,10 @@ export const AddButton = styled.button`
 
 export const InfoText = styled.p`
   color: #666;
-  font-size: ${props => props.small ? '14px' : '16px'};
-  margin: ${props => props.small ? '8px 0' : '16px 0'};
-  line-height: 1.5;
-  
-  &:before {
-    content: '';
-    display: block;
-    margin: 8px 0;
-  }
+  margin: 8px 0;
+  font-size: ${props => props.$small ? '14px' : '16px'};
+  text-align: ${props => props.$center ? 'center' : 'left'};
+  margin-top: ${props => props.$marginTop ? props.$marginTop : '0'};
 `;
 
 export const Tooltip = styled.div`

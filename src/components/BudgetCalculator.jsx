@@ -28,6 +28,7 @@ import { db, ref, onValue, set, runTransaction } from '../firebase';
 import AdminDashboard from './AdminDashboard';
 import BankLink from './BankLink';
 import SpendingAnalytics from './SpendingAnalytics';
+import { trackCalculatorUsage, trackBudgetUpdate, trackFeatureUsage } from '../services/analytics';
 
 const TabContainer = styled.div`
   display: grid;
@@ -716,6 +717,7 @@ const BudgetCalculator = () => {
       discretionaryDay,
       discretionaryWeek
     });
+    trackCalculatorUsage('Budget Calculation', 'Calculate');
   };
 
   const calculateAdditionalMonthlyIncome = () => {
@@ -741,6 +743,7 @@ const BudgetCalculator = () => {
       ...prev,
       [name]: value === '' || value === null ? 0 : parseFloat(value) || 0
     }));
+    trackCalculatorUsage('Input Change', name);
   };
 
   const handleExpenseChange = (id, field, value) => {
@@ -751,6 +754,7 @@ const BudgetCalculator = () => {
     setExpenses(prev => prev.map(expense => 
       expense.id === id ? { ...expense, [field]: value } : expense
     ));
+    trackBudgetUpdate('Expense Update', field);
   };
 
   const handleSubscriptionChange = (id, field, value) => {
@@ -763,8 +767,14 @@ const BudgetCalculator = () => {
   };
 
   const addExpense = () => {
-    const newId = Math.max(...expenses.map(e => e.id), 0) + 1;
-    setExpenses(prev => [...prev, { id: newId, name: '', amount: 0 }]);
+    const newExpense = {
+      id: Date.now(),
+      category: '',
+      amount: '',
+      frequency: 'monthly'
+    };
+    setExpenses(prev => [...prev, newExpense]);
+    trackFeatureUsage('Expense Management', 'Add Expense');
   };
 
   const addSubscription = () => {
@@ -774,6 +784,7 @@ const BudgetCalculator = () => {
 
   const deleteExpense = (id) => {
     setExpenses(prev => prev.filter(expense => expense.id !== id));
+    trackFeatureUsage('Expense Management', 'Delete Expense');
   };
 
   const deleteSubscription = (id) => {
