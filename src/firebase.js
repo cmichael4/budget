@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, set, runTransaction } from 'firebase/database';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBeXmP-U5F1R41ZH2LPsy43V6xxkm0nt7o",
@@ -14,13 +15,17 @@ const firebaseConfig = {
 
 let app;
 let db;
+let auth;
 
 try {
   app = initializeApp(firebaseConfig);
   db = getDatabase(app);
+  auth = getAuth(app);
   console.log("Firebase initialized successfully");
 } catch (error) {
   console.error("Firebase initialization error:", error);
 }
 
-export { db, ref, onValue, set, runTransaction }; 
+const googleProvider = new GoogleAuthProvider();
+
+export { db, ref, onValue, set, runTransaction, auth, googleProvider }; 

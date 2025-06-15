@@ -1,34 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import {
-  BudgetTable,
-  InputRow,
-  CalculatedRow,
-  Label,
-  Value,
-  InputField,
-  Section,
-  DeleteButton,
-  AddButton,
-  Tooltip,
-  Summary,
-  SummaryRow,
-  SummaryLabel,
-  SummaryValue,
-  Grid,
-  InputWrapper,
-  PageTitle,
-  CategoryIcon,
-  SectionTitle,
-  RequiredField,
-  HelpText,
-} from './BudgetStyles';
-import InvestmentGrowth from './InvestmentGrowth';
 import styled from 'styled-components';
 import { db, ref, onValue, set, runTransaction } from '../firebase';
 import AdminDashboard from './AdminDashboard';
-import BankLink from './BankLink';
 import SpendingAnalytics from './SpendingAnalytics';
 import { trackCalculatorUsage, trackBudgetUpdate, trackFeatureUsage } from '../services/analytics';
+import { 
+  InputWrapper, 
+  PageTitle, 
+  CategoryIcon, 
+  SectionTitle, 
+  Label, 
+  RequiredField,
+  CalculatedRow,
+  Value,
+  Section
+} from './BudgetStyles';
+import InvestmentGrowth from './InvestmentGrowth';
+import { FaDollarSign, FaChartLine, FaWallet, FaUserFriends, FaEye } from 'react-icons/fa';
+import Tooltip from '@mui/material/Tooltip';
+import GoogleSignIn from './GoogleSignIn';
+
+const DashboardTitle = styled.h1`
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: -1px;
+  color: #222;
+`;
+
+const LastUpdated = styled.div`
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 18px;
+`;
+
+const Card = styled.div`
+  background: linear-gradient(135deg, #f9fafb 80%, #f3f7f4 100%);
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(44, 62, 80, 0.10);
+  padding: 12px 12px 12px 12px;
+  margin: 4px 0;
+  overflow: hidden;
+  max-width: 900px;
+  width: 100%;
+  border: 1px solid #ececec;
+`;
+
+const MetricsGrid = styled.div`
+  display: flex;
+  gap: 6px;
+  background: none;
+  border-radius: 14px;
+  overflow: visible;
+  margin-top: 4px;
+`;
 
 const TabContainer = styled.div`
   display: grid;
@@ -66,64 +91,69 @@ const Tab = styled.button`
   }
 `;
 
-const Card = styled.div`
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  margin: 8px 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  
-  @media (min-width: 768px) {
-    padding: 20px;
-    margin: 12px 0;
-  }
-`;
-
 const Highlight = styled.div`
   background: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  
+  border-radius: 10px;
+  padding: 20px 10px 16px 10px;
+  box-shadow: 0 1px 2px rgba(44, 62, 80, 0.04);
   h3 {
     color: #666;
-    font-size: 14px;
-    margin: 0;
-  }
-  
-  .amount {
-    font-size: 24px;
+    font-size: 1.1rem;
+    margin: 0 0 8px 0;
     font-weight: 600;
+  }
+  .amount {
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #2e7d32;
     margin: 8px 0;
   }
-  
   .sublabel {
-    font-size: 12px;
-    color: #666;
+    font-size: 13px;
+    color: #a0a0a0;
   }
 `;
 
 const KeyMetric = styled.div`
+  flex: 1;
+  padding: 8px 0 6px 0;
   text-align: center;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.07);
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.15s, background 0.15s;
+  &:hover {
+    background: #f6f8fa;
+    box-shadow: 0 4px 16px rgba(44, 62, 80, 0.12);
+    z-index: 1;
+  }
+  .icon {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+    color: #219150;
+  }
   .label {
-    color: #666;
-    font-size: 14px;
-  }
-  
-  .value {
-    font-size: 24px;
-    font-weight: 600;
-    color: #2e7d32;
-    margin: 8px 0;
-  }
-  
-  .sublabel {
+    color: #888;
     font-size: 12px;
-    color: #666;
+    font-weight: 500;
+    margin-bottom: 1px;
+  }
+  .value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #222;
+    margin: 3px 0 1px 0;
+    letter-spacing: -1px;
+  }
+  .sublabel {
+    font-size: 10px;
+    color: #b0b0b0;
+    font-weight: 400;
+    margin-top: 0;
   }
 `;
 
@@ -323,13 +353,21 @@ const AppContainer = styled.div`
 const MainContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-top: 0;
+  @media (max-width: 700px) {
+    padding: 0 4px;
+    max-width: 100vw;
+  }
 `;
 
 const Sidebar = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-right: 32px;
 `;
 
 const InfoText = styled.p`
@@ -411,15 +449,255 @@ const ActionButton = styled.button`
   }
 `;
 
-const MetricsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
+const GuidanceBanner = styled.div`
+  background: #eaf4fd;
+  border-left: 4px solid #2196f3;
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  font-size: 15px;
+  box-shadow: 0 1px 4px rgba(33, 150, 243, 0.06);
+  .title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    color: #1976d2;
+  }
+  .content {
+    color: #4a4a4a;
+    line-height: 1.7;
+  }
+`;
+
+const NavigationButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
   gap: 12px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 24px;
+`;
+
+const NavButton = styled.button`
+  background: ${props => props.$primary ? '#4caf50' : 'transparent'};
+  color: ${props => props.$primary ? 'white' : '#4caf50'};
+  border: ${props => props.$primary ? 'none' : '1px solid #4caf50'};
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const WelcomeBanner = styled.div`
+  background: #fffde7;
+  border-left: 4px solid #ffd600;
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  font-size: 16px;
+  color: #795548;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 4px rgba(255, 214, 0, 0.06);
+`;
+
+const ValueProposition = styled.div`
+  background: #e8f5e9;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
   
-  @media (min-width: 600px) {
+  h2 {
+    color: #2e7d32;
+    margin: 0 0 16px 0;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .steps {
+    display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
+    margin-bottom: 20px;
   }
+  
+  .step {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    
+    h3 {
+      color: #2e7d32;
+      margin: 0 0 12px 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    p {
+      margin: 0;
+      color: #666;
+      line-height: 1.5;
+    }
+  }
+  
+  .cta {
+    text-align: center;
+    margin-top: 20px;
+  }
+`;
+
+const NoDataCallout = styled.div`
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 28px 24px;
+  border-radius: 12px;
+  margin: 32px 0;
+  text-align: center;
+  color: #a67c00;
+  font-size: 18px;
+  box-shadow: 0 1px 4px rgba(255, 152, 0, 0.06);
+`;
+
+const CTAButton = styled.button`
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover {
+    background: #388e3c;
+  }
+`;
+
+const SectionDescription = styled.div`
+  color: #666;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 8px;
+`;
+
+const WhatsNextSection = styled.div`
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 28px 24px;
+  border-radius: 12px;
+  margin: 56px 0 0 0;
+  font-size: 16px;
+  color: #1565c0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(33, 150, 243, 0.06);
+  justify-content: space-between;
+`;
+
+const SectionSpacer = styled.div`
+  height: 16px;
+`;
+
+const TractionBanner = styled.section`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #e0ffe7 60%, #f0f4ff 100%);
+  border-radius: 14px;
+  padding: 18px 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+  font-size: 1.1rem;
+  font-weight: 600;
+`;
+
+const TestimonialCard = styled.section`
+  background: #f6f8fa;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(44, 62, 80, 0.07);
+  padding: 12px 16px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 1rem;
+`;
+
+const StatGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 20px;
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+`;
+
+const StatBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(44,62,80,0.04);
+  padding: 26px 20px 20px 20px;
+  min-width: 0;
+  width: 100%;
+  min-height: 148px;
+  height: 100%;
+  box-sizing: border-box;
+`;
+
+const StatAmount = styled.div`
+  font-size: 28px;
+  font-weight: 800;
+  color: ${props => props.color || '#222'};
+  line-height: 1.1;
+  margin-bottom: 6px;
+`;
+
+const StatLabel = styled.div`
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0;
+`;
+
+const StatSubtext = styled.div`
+  font-size: 14px;
+  color: #888;
+  font-weight: 400;
+  margin-top: auto;
+  line-height: 1.3;
 `;
 
 const TABS = [
@@ -475,14 +753,6 @@ const EmptyState = ({ type, onAddExpense }) => {
 };
 
 const BudgetCalculator = () => {
-  const clearAllData = () => {
-    localStorage.removeItem('budgetData');
-    localStorage.removeItem('expenses');
-    localStorage.removeItem('additionalIncomes');
-    localStorage.removeItem('userProgress');
-    window.location.reload(); // Force reload to reset state
-  };
-
   const loadFromLocalStorage = () => {
     try {
       const savedBudgetData = localStorage.getItem('budgetData');
@@ -541,9 +811,6 @@ const BudgetCalculator = () => {
 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
-  const [linkedAccounts, setLinkedAccounts] = useState([]);
-  const [bankTransactions, setBankTransactions] = useState([]);
-
   const [userProgress, setUserProgress] = useState({
     hasEnteredIncome: false,
     hasAddedExpense: false,
@@ -551,6 +818,10 @@ const BudgetCalculator = () => {
   });
 
   const [analyticsError, setAnalyticsError] = useState(null);
+
+  const hasData = budgetData.biweeklyPaycheck !== '' && expenses.length > 0;
+  const [showSummary, setShowSummary] = useState(hasData);
+  useEffect(() => { setShowSummary(hasData); }, [hasData]);
 
   useEffect(() => {
     calculateBudget();
@@ -896,109 +1167,118 @@ const BudgetCalculator = () => {
     }
   };
 
-  const handleAccountsLinked = ({ accounts, transactions }) => {
-    setLinkedAccounts(accounts);
-    setBankTransactions(transactions);
-    
-    // Update expenses based on transactions
-    const newExpenses = transactions.flat().map(transaction => ({
-      id: transaction.id,
-      name: transaction.description,
-      amount: Math.abs(transaction.amount),
-      date: transaction.date,
-      category: transaction.category
-    }));
-    
-    setExpenses(newExpenses);
-  };
-
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
         return (
           <>
-            {!userProgress.hasEnteredIncome && (
-              <TipBanner>
-                <div className="title">
-                  👋 Welcome to SmartBudget!
-                </div>
-                <div className="content">
-                  Let's start by entering your income and expenses to get a clear picture of your finances.
-                  This will help us provide personalized recommendations.
-                  <br />
-                  <ActionButton 
-                    $primary 
-                    onClick={() => setActiveTab('budget')}
-                    style={{ marginTop: '12px' }}
-                  >
-                    Get Started →
-                  </ActionButton>
-                </div>
-              </TipBanner>
-            )}
-            
-            {budgetData.biweeklyPaycheck === '' ? (
-              <Card>
-                <EmptyState type="income" />
-              </Card>
+            {!showSummary ? (
+              <>
+                <ValueProposition>
+                  <h2>Smart Budget Planning Made Simple</h2>
+                  <div className="steps">
+                    <div className="step">
+                      <h3>📝 Enter Your Income</h3>
+                      <p>Start by entering your after-tax income to get accurate calculations for your spending power.</p>
+                    </div>
+                    <div className="step">
+                      <h3>💸 Add Your Expenses</h3>
+                      <p>List your regular monthly expenses and bills to understand your financial commitments.</p>
+                    </div>
+                    <div className="step">
+                      <h3>🎯 Set Savings Goals</h3>
+                      <p>Define your yearly savings target and see how your money can grow through investments.</p>
+                    </div>
+                  </div>
+                  <div className="cta" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <ActionButton $primary onClick={() => setActiveTab('budget')}>
+                      Start Planning Your Budget →
+                    </ActionButton>
+                    {hasData && (
+                      <ActionButton style={{ background: '#e0f7fa', color: '#00796b', border: 'none' }} onClick={() => setShowSummary(true)}>
+                        See Your Summary
+                      </ActionButton>
+                    )}
+                  </div>
+                </ValueProposition>
+              </>
             ) : (
               <>
+                <h2 style={{ fontWeight: 800, fontSize: '1.7rem', margin: '0 0 18px 0', color: '#222' }}>Your Budget Overview</h2>
+                <GuidanceBanner>
+                  <div className="title">
+                    💡 Quick Tips
+                  </div>
+                  <div className="content">
+                    • Check the <strong>Overview</strong> tab for your budget summary and key metrics<br />
+                    • Visit the <strong>Investments</strong> tab to see how your savings can grow over time<br />
+                    • Use the <strong>Insights</strong> tab for personalized recommendations
+                  </div>
+                </GuidanceBanner>
                 <Card>
-                  <SectionTitle>
+                  <SectionTitle style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 0 }}>
                     <CategoryIcon>💰</CategoryIcon>
-                    <h2>Quick Budget Summary</h2>
+                    <h2 style={{ fontSize: '1.45rem', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>Quick Budget Summary</h2>
                   </SectionTitle>
-                  <MetricsGrid>
-                    <KeyMetric>
-                      <div className="label">Monthly Income</div>
-                      <div className="value">${calculatedData.monthlyIncome.toFixed(2)}</div>
-                      <div className="sublabel">after taxes</div>
-                    </KeyMetric>
-                    <KeyMetric>
-                      <div className="label">Monthly Expenses</div>
-                      <div className="value" style={{ color: '#ff5252' }}>${calculatedData.totalMonthlyExpenses.toFixed(2)}</div>
-                      <div className="sublabel">bills & necessities</div>
-                    </KeyMetric>
-                    <KeyMetric>
-                      <div className="label">Available Daily Budget</div>
-                      <div className="value" style={{ color: '#4caf50' }}>${calculatedData.discretionaryDay.toFixed(2)}</div>
-                      <div className="sublabel">for flexible spending</div>
-                    </KeyMetric>
-                  </MetricsGrid>
+                  <SectionDescription>
+                    See your key numbers at a glance. This summary updates as you enter your data.
+                  </SectionDescription>
+                  <StatGrid>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.monthlyIncome.toFixed(2)}</StatAmount>
+                      <StatLabel>Monthly Income</StatLabel>
+                      <StatSubtext>after taxes</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#ff5252">${calculatedData.totalMonthlyExpenses.toFixed(2)}</StatAmount>
+                      <StatLabel>Monthly Expenses</StatLabel>
+                      <StatSubtext>bills & necessities</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.discretionaryDay.toFixed(2)}</StatAmount>
+                      <StatLabel>Available Daily Budget</StatLabel>
+                      <StatSubtext>for flexible spending</StatSubtext>
+                    </StatBox>
+                  </StatGrid>
                 </Card>
-
                 <Card>
-                  <SectionTitle>
+                  <SectionTitle style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <CategoryIcon>📅</CategoryIcon>
                     <h2>Spending Breakdown</h2>
                   </SectionTitle>
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
-                    gap: '12px' 
-                  }}>
-                    <Highlight>
-                      <h3>Weekly Budget</h3>
-                      <div className="amount">${calculatedData.discretionaryWeek.toFixed(2)}</div>
-                      <div className="sublabel">for discretionary spending</div>
-                    </Highlight>
-                    <Highlight>
-                      <h3>Monthly Savings</h3>
-                      <div className="amount">${calculatedData.savingsGoalMonth.toFixed(2)}</div>
-                      <div className="sublabel">towards your goals</div>
-                    </Highlight>
-                    <Highlight>
-                      <h3>Emergency Fund</h3>
-                      <div className="amount">${(calculatedData.totalMonthlyExpenses * 6).toFixed(2)}</div>
-                      <div className="sublabel">recommended 6-month buffer</div>
-                    </Highlight>
-                  </div>
+                  <SectionDescription>
+                    Breakdown of your weekly, monthly, and emergency fund targets based on your current budget.
+                  </SectionDescription>
+                  <StatGrid>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.discretionaryWeek.toFixed(2)}</StatAmount>
+                      <StatLabel>Weekly Budget</StatLabel>
+                      <StatSubtext>for discretionary spending</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.savingsGoalMonth.toFixed(2)}</StatAmount>
+                      <StatLabel>Monthly Savings</StatLabel>
+                      <StatSubtext>towards your goals</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${(calculatedData.totalMonthlyExpenses * 6).toFixed(2)}</StatAmount>
+                      <StatLabel>Emergency Fund</StatLabel>
+                      <StatSubtext>recommended 6-month buffer</StatSubtext>
+                    </StatBox>
+                  </StatGrid>
                 </Card>
+                <NavigationButtons>
+                  <NavButton onClick={() => setActiveTab('investments')}>
+                    📈 View Investment Growth
+                  </NavButton>
+                  <NavButton $primary onClick={() => setActiveTab('insights')}>
+                    💡 Get Personalized Insights
+                  </NavButton>
+                  <NavButton style={{ background: '#e0f7fa', color: '#00796b', border: 'none' }} onClick={() => setShowSummary(false)}>
+                    Back to Getting Started
+                  </NavButton>
+                </NavigationButtons>
               </>
-            )}
-
-            {budgetData.biweeklyPaycheck !== '' && (
-              <BankLink onAccountsLinked={handleAccountsLinked} />
             )}
           </>
         );
@@ -1006,130 +1286,118 @@ const BudgetCalculator = () => {
       case 'budget':
         return (
           <>
-            <TipBanner $type="info">
-              <div className="title">
+            {/* Compact Quick Tips Banner */}
+            <TipBanner $type="info" style={{ marginBottom: 12, fontSize: 13, padding: '10px 14px' }}>
+              <div className="title" style={{ fontSize: 14, marginBottom: 2 }}>
                 💡 Quick Tips
               </div>
-              <div className="content">
-                • Enter your after-tax income for accurate calculations<br />
-                • Add your regular monthly expenses<br />
-                • Don't forget recurring bills and subscriptions
+              <div className="content" style={{ fontSize: 13 }}>
+                • Enter your after-tax income and monthly expenses<br />
+                • Add recurring bills and subscriptions<br />
+                • Check Overview and Investments tabs for insights
               </div>
             </TipBanner>
 
-            <Card>
-              <Section>
-                <SectionTitle>
-                  <CategoryIcon>💸</CategoryIcon>
-                  <h2>Income Sources</h2>
-                </SectionTitle>
-                {budgetData.biweeklyPaycheck === '' && <EmptyState type="income" />}
-                <StyledInputRow>
-                  <Label>
-                    Biweekly Paycheck Amount (After Taxes)<RequiredField>*</RequiredField>
-                  </Label>
-                  <InputWrapper>
-                    <StyledInputField
-                      type="number"
-                      name="biweeklyPaycheck"
-                      value={budgetData.biweeklyPaycheck || ''}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      required
-                    />
-                  </InputWrapper>
-                </StyledInputRow>
+            {/* Modern, Clean Unified Budget Form */}
+            <Card style={{ padding: 28, margin: 0, background: '#fafbfc', border: '1px solid #e0e0e0', boxShadow: '0 1px 4px rgba(44,62,80,0.04)' }}>
+              {/* Income Section */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <CategoryIcon>💰</CategoryIcon> Income
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 400 }}>
+                  <label style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>Biweekly Paycheck (After Taxes)</label>
+                  <StyledInputField
+                    type="number"
+                    name="biweeklyPaycheck"
+                    value={budgetData.biweeklyPaycheck || ''}
+                    onChange={handleInputChange}
+                    placeholder="$0.00"
+                    step="0.01"
+                    min="0"
+                    required
+                    style={{ fontSize: 15, padding: '10px 12px', width: '100%' }}
+                  />
+                </div>
+              </div>
 
-                {/* Additional Income Section */}
-                <SectionTitle style={{ marginTop: '24px', fontSize: '16px' }}>
-                  <CategoryIcon>➕</CategoryIcon>
-                  <span>Additional Income</span>
-                </SectionTitle>
-                {additionalIncomes.length === 0 && (
-                  <InfoText $small $center>No additional income sources added yet.</InfoText>
-                )}
-                {additionalIncomes.map((income, idx) => (
-                  <StyledInputRow key={income.id}>
-                    <Label>Source</Label>
-                    <div style={{ flex: 1 }}>
+              <div style={{ borderTop: '1px solid #ececec', margin: '18px 0' }} />
+
+              {/* Additional Income Section */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontWeight: 600, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <CategoryIcon>➕</CategoryIcon> Additional Income
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 500 }}>
+                  {additionalIncomes.map((income, idx) => (
+                    <div key={income.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <StyledInputField
                         type="text"
                         value={income.name}
                         onChange={e => handleAdditionalIncomeChange(income.id, 'name', e.target.value)}
-                        placeholder="e.g. Side gig, rental, etc."
+                        placeholder="Source"
+                        style={{ fontSize: 14, padding: '8px 10px', width: 120 }}
                       />
-                    </div>
-                    <Label>Amount</Label>
-                    <InputWrapper>
                       <StyledInputField
                         type="number"
                         value={income.amount || ''}
                         onChange={e => handleAdditionalIncomeChange(income.id, 'amount', e.target.value)}
-                        placeholder="0.00"
+                        placeholder="$0.00"
                         step="0.01"
                         min="0"
+                        style={{ fontSize: 14, padding: '8px 10px', width: 100 }}
                       />
-                    </InputWrapper>
-                    <Label>Frequency</Label>
-                    <div style={{ flex: 1 }}>
                       <StyledSelect
                         value={income.frequency}
                         onChange={e => handleAdditionalIncomeChange(income.id, 'frequency', e.target.value)}
+                        style={{ fontSize: 14, padding: '8px 10px', width: 100 }}
                       >
                         <option value="monthly">Monthly</option>
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Biweekly</option>
                         <option value="yearly">Yearly</option>
                       </StyledSelect>
+                      <StyledDeleteButton
+                        onClick={() => deleteAdditionalIncome(income.id)}
+                        title="Remove income source"
+                        style={{ fontSize: 16, width: 26, height: 26 }}
+                      >×</StyledDeleteButton>
                     </div>
-                    <StyledDeleteButton
-                      onClick={() => deleteAdditionalIncome(income.id)}
-                      title="Remove income source"
-                    >×</StyledDeleteButton>
-                  </StyledInputRow>
-                ))}
-                <StyledAddButton onClick={addAdditionalIncome}>
-                  + Add Additional Income
-                </StyledAddButton>
-              </Section>
-            </Card>
+                  ))}
+                  <StyledAddButton onClick={addAdditionalIncome} style={{ fontSize: 13, padding: '5px 10px', margin: '2px 0', borderRadius: 6, border: '1.5px solid #4caf50', color: '#4caf50', background: 'white' }}>
+                    + Add Additional Income
+                  </StyledAddButton>
+                </div>
+              </div>
 
-            <Card>
-              <Section>
-                <SectionTitle>
-                  <CategoryIcon>💾</CategoryIcon>
-                  <h2>Savings Goal</h2>
-                </SectionTitle>
-                <InfoText $small $center style={{ marginBottom: '12px', color: '#2e7d32' }}>
-                  Set a goal for how much you want to save. You can enter a yearly or monthly amount.
-                </InfoText>
-                <StyledInputRow>
-                  <Label>
-                    Yearly Savings Goal
-                  </Label>
-                  <InputWrapper>
+              <div style={{ borderTop: '1px solid #ececec', margin: '18px 0' }} />
+
+              {/* Savings Goal Section */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontWeight: 600, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <CategoryIcon>💾</CategoryIcon> Savings Goal
+                </div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', maxWidth: 500 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>Yearly</label>
                     <StyledInputField
                       type="number"
                       name="savingsGoalYear"
                       value={budgetData.savingsGoalYear || ''}
                       onChange={handleInputChange}
-                      placeholder="0.00"
+                      placeholder="$0.00"
                       step="0.01"
                       min="0"
+                      style={{ fontSize: 14, padding: '8px 10px', width: '100%' }}
                     />
-                  </InputWrapper>
-                  <Label>
-                    (or Monthly)
-                  </Label>
-                  <InputWrapper>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>(or Monthly)</label>
                     <StyledInputField
                       type="number"
                       name="savingsGoalMonth"
                       value={budgetData.savingsGoalMonth || ''}
                       onChange={e => {
-                        // Update yearly goal based on monthly input
                         const monthVal = parseFloat(e.target.value) || 0;
                         setBudgetData(prev => ({
                           ...prev,
@@ -1137,106 +1405,159 @@ const BudgetCalculator = () => {
                           savingsGoalYear: monthVal * 12
                         }));
                       }}
-                      placeholder="0.00"
+                      placeholder="$0.00"
                       step="0.01"
                       min="0"
+                      style={{ fontSize: 14, padding: '8px 10px', width: '100%' }}
                     />
-                  </InputWrapper>
-                </StyledInputRow>
-              </Section>
-            </Card>
+                  </div>
+                </div>
+              </div>
 
-            <Card>
-              <Section>
-                <SectionTitle>
-                  <CategoryIcon>💳</CategoryIcon>
-                  <h2>Monthly Recurring Expenses</h2>
-                </SectionTitle>
-                <InfoText $small $center style={{ marginBottom: '12px', color: '#2e7d32' }}>
-                  List your regular monthly bills here. This means things you pay every month, like rent, phone, car payment, insurance, utilities, or groceries.<br />
-                  <span style={{ color: '#ff9800' }}>Don't add spending money for things like eating out, shopping, or fun. We'll help you plan for that in your daily budget.</span>
-                </InfoText>
-                {expenses.length === 0 ? (
-                  <EmptyState type="expenses" onAddExpense={addExpense} />
-                ) : (
-                  <>
-                    {expenses.map(expense => (
-                      <StyledInputRow key={expense.id}>
-                        <InputGroup>
-                          <StyledInputField
-                            type="text"
-                            value={expense.name}
-                            onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
-                            placeholder="e.g. Rent, Phone, Car, Groceries"
-                          />
-                          <AmountInputGroup>
-                            <span className="currency-symbol">$</span>
-                            <StyledInputField
-                              type="number"
-                              value={expense.amount || ''}
-                              onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
-                              placeholder="0.00"
-                              step="0.01"
-                              min="0"
-                            />
-                          </AmountInputGroup>
-                          <StyledDeleteButton 
-                            onClick={() => deleteExpense(expense.id)}
-                            title="Remove expense"
-                          >×</StyledDeleteButton>
-                        </InputGroup>
-                      </StyledInputRow>
-                    ))}
-                    <StyledAddButton onClick={addExpense}>
-                      + Add Another Expense
-                    </StyledAddButton>
-                  </>
+              <div style={{ borderTop: '1px solid #ececec', margin: '18px 0' }} />
+
+              {/* Expenses Section */}
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontWeight: 600, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <CategoryIcon>💳</CategoryIcon> Monthly Expenses
+                </div>
+                {expenses.length === 0 && (
+                  <div style={{ color: '#888', fontSize: 14, marginBottom: 6 }}>No expenses added yet.</div>
                 )}
-              </Section>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 500 }}>
+                  {expenses.map(expense => (
+                    <div key={expense.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <StyledInputField
+                        type="text"
+                        value={expense.name}
+                        onChange={(e) => handleExpenseChange(expense.id, 'name', e.target.value)}
+                        placeholder="e.g. Rent, Phone, Groceries"
+                        style={{ fontSize: 14, padding: '8px 10px', width: 140 }}
+                      />
+                      <AmountInputGroup style={{ flex: 1 }}>
+                        <span className="currency-symbol">$</span>
+                        <StyledInputField
+                          type="number"
+                          value={expense.amount || ''}
+                          onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          style={{ fontSize: 14, padding: '8px 10px', width: 100, paddingLeft: 22 }}
+                        />
+                      </AmountInputGroup>
+                      <StyledDeleteButton 
+                        onClick={() => deleteExpense(expense.id)}
+                        title="Remove expense"
+                        style={{ fontSize: 16, width: 26, height: 26 }}
+                      >×</StyledDeleteButton>
+                    </div>
+                  ))}
+                  <StyledAddButton onClick={addExpense} style={{ fontSize: 13, padding: '5px 10px', margin: '2px 0', borderRadius: 6, border: '1.5px solid #4caf50', color: '#4caf50', background: 'white' }}>
+                    + Add Expense
+                  </StyledAddButton>
+                </div>
+              </div>
             </Card>
 
-            {/* Navigation Buttons for Budget Step */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-              <ActionButton onClick={() => setActiveTab('overview')}>
-                ← Back to Overview
-              </ActionButton>
-              <ActionButton
+            {/* Compact Navigation Buttons */}
+            <NavigationButtons style={{ marginTop: 18, paddingTop: 10, gap: 8 }}>
+              <NavButton onClick={() => setActiveTab('overview')} style={{ fontSize: 14, padding: '8px 14px' }}>
+                ← Overview
+              </NavButton>
+              <NavButton
                 $primary
                 onClick={() => setActiveTab('insights')}
                 disabled={budgetData.biweeklyPaycheck === '' || expenses.length === 0}
                 title={budgetData.biweeklyPaycheck === '' || expenses.length === 0 ? 'Please enter your income and at least one expense to continue' : ''}
+                style={{ fontSize: 14, padding: '8px 14px' }}
               >
-                Next: See Insights →
-              </ActionButton>
-            </div>
+                Next: Insights →
+              </NavButton>
+            </NavigationButtons>
           </>
         );
 
       case 'insights':
         return (
           <>
-            {budgetData.biweeklyPaycheck === '' ? (
-              <Card>
-                <EmptyState type="income" />
-              </Card>
-            ) : expenses.length === 0 ? (
-              <Card>
-                <EmptyState type="expenses" onAddExpense={addExpense} />
-              </Card>
+            {(budgetData.biweeklyPaycheck === '' || Number(budgetData.biweeklyPaycheck) === 0 || expenses.length === 0) ? (
+              <NoDataCallout>
+                <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>📝</div>
+                <div>
+                  <strong>Let's get started!</strong><br />
+                  Enter your income and expenses on the <b>Budget</b> tab to see your personalized insights.
+                </div>
+                <CTAButton onClick={() => setActiveTab('budget')}>Go to Budget</CTAButton>
+              </NoDataCallout>
             ) : (
               <>
-                {!userProgress.hasViewedInsights && (
-                  <TipBanner $type="info">
-                    <div className="title">
-                      📊 Understanding Your Analysis
-                    </div>
-                    <div className="content">
-                      We analyze your spending patterns and compare them to recommended
-                      financial guidelines. Look for opportunities to optimize your budget
-                      and build long-term financial health.
-                    </div>
-                  </TipBanner>
-                )}
+                <TractionBanner>
+                  <span>
+                    <FaUserFriends style={{ marginRight: 8 }} />
+                    Helping <b>{formatNumberWithCommas(viewCount)}+</b> young professionals take control of their money!
+                  </span>
+                </TractionBanner>
+
+                <Card>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 0, minHeight: 0 }}>
+                    <SectionTitle style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 0 }}>
+                      <CategoryIcon>💰</CategoryIcon>
+                      <h2 style={{ fontSize: '1.45rem', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>Quick Budget Summary</h2>
+                    </SectionTitle>
+                  </div>
+                  <SectionDescription>
+                    See your key numbers at a glance. This summary updates as you enter your data.
+                  </SectionDescription>
+                  <StatGrid>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.monthlyIncome.toFixed(2)}</StatAmount>
+                      <StatLabel>Monthly Income</StatLabel>
+                      <StatSubtext>after taxes</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#ff5252">${calculatedData.totalMonthlyExpenses.toFixed(2)}</StatAmount>
+                      <StatLabel>Monthly Expenses</StatLabel>
+                      <StatSubtext>bills & necessities</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.discretionaryDay.toFixed(2)}</StatAmount>
+                      <StatLabel>Available Daily Budget</StatLabel>
+                      <StatSubtext>for flexible spending</StatSubtext>
+                    </StatBox>
+                  </StatGrid>
+                </Card>
+
+                <SectionSpacer />
+
+                <Card>
+                  <SectionTitle style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <CategoryIcon>📅</CategoryIcon>
+                    <h2>Spending Breakdown</h2>
+                  </SectionTitle>
+                  <SectionDescription>
+                    Breakdown of your weekly, monthly, and emergency fund targets based on your current budget.
+                  </SectionDescription>
+                  <StatGrid>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.discretionaryWeek.toFixed(2)}</StatAmount>
+                      <StatLabel>Weekly Budget</StatLabel>
+                      <StatSubtext>for discretionary spending</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${calculatedData.savingsGoalMonth.toFixed(2)}</StatAmount>
+                      <StatLabel>Monthly Savings</StatLabel>
+                      <StatSubtext>towards your goals</StatSubtext>
+                    </StatBox>
+                    <StatBox>
+                      <StatAmount color="#2e7d32">${(calculatedData.totalMonthlyExpenses * 6).toFixed(2)}</StatAmount>
+                      <StatLabel>Emergency Fund</StatLabel>
+                      <StatSubtext>recommended 6-month buffer</StatSubtext>
+                    </StatBox>
+                  </StatGrid>
+                </Card>
+
+                <SectionSpacer />
 
                 <Card>
                   <SectionTitle>
@@ -1248,6 +1569,17 @@ const BudgetCalculator = () => {
                     monthlyIncome={calculatedData.monthlyIncome} 
                   />
                 </Card>
+
+                <WhatsNextSection>
+                  <span style={{ fontSize: '2rem' }}>🚀</span>
+                  <div>
+                    <strong>What's Next?</strong><br />
+                    Explore the <b>Investments</b> tab to see how your savings can grow over time!
+                  </div>
+                  <CTAButton style={{ marginLeft: 'auto' }} onClick={() => setActiveTab('investments')}>
+                    Try Investment Growth
+                  </CTAButton>
+                </WhatsNextSection>
               </>
             )}
           </>
@@ -1255,9 +1587,30 @@ const BudgetCalculator = () => {
 
       case 'investments':
         return (
-          <Card>
-            <InvestmentGrowth annualSavings={budgetData.savingsGoalYear || 0} />
-          </Card>
+          <>
+            <GuidanceBanner>
+              <div className="title">
+                📈 Investment Growth Calculator
+              </div>
+              <div className="content">
+                See how your savings can grow over time with compound interest.
+                Adjust the investment period and expected return rate to explore different scenarios.
+              </div>
+            </GuidanceBanner>
+
+            <Card>
+              <InvestmentGrowth annualSavings={budgetData.savingsGoalYear || 0} />
+            </Card>
+
+            <NavigationButtons>
+              <NavButton onClick={() => setActiveTab('insights')}>
+                ← Back to Insights
+              </NavButton>
+              <NavButton $primary onClick={() => setActiveTab('overview')}>
+                Return to Overview →
+              </NavButton>
+            </NavigationButtons>
+          </>
         );
 
       case 'admin':
@@ -1295,6 +1648,7 @@ const BudgetCalculator = () => {
             </span>
           </span>
         </PageTitle>
+        <GoogleSignIn />
 
         <div style={{
           background: 'linear-gradient(45deg, #2e7d32, #4caf50)',
@@ -1369,5 +1723,10 @@ const BudgetCalculator = () => {
     </AppContainer>
   );
 };
+
+function formatNumberWithCommas(num) {
+  if (typeof num !== 'number') return num;
+  return num.toLocaleString();
+}
 
 export default BudgetCalculator; 
